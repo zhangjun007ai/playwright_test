@@ -244,6 +244,58 @@ class RealtimeTestRecorder:
                 let labelText = '';
                 let labels = [];
                 
+                // 特殊处理图标元素
+                if (element.classList && Array.from(element.classList).some(cls => cls.includes('glyphicon'))) {
+                    // 方法1: 检查title属性
+                    if (element.title) {
+                        labels.push(element.title);
+                    }
+                    
+                    // 方法2: 检查aria-label属性
+                    if (element.getAttribute('aria-label')) {
+                        labels.push(element.getAttribute('aria-label'));
+                    }
+                    
+                    // 方法3: 检查父元素的文本内容
+                    let parent = element.parentElement;
+                    if (parent) {
+                        // 克隆父元素以防止修改原始DOM
+                        const parentClone = parent.cloneNode(true);
+                        // 移除所有图标元素
+                        parentClone.querySelectorAll('.glyphicon').forEach(icon => icon.remove());
+                        const parentText = parentClone.innerText || parentClone.textContent;
+                        if (parentText.trim()) {
+                            labels.push(parentText.trim());
+                        }
+                    }
+                    
+                    // 方法4: 使用图标类名映射
+                    const iconClassMap = {
+                        'glyphicon-refresh': '刷新',
+                        'glyphicon-search': '搜索',
+                        'glyphicon-plus': '添加',
+                        'glyphicon-minus': '删除',
+                        'glyphicon-edit': '编辑',
+                        'glyphicon-trash': '删除',
+                        'glyphicon-ok': '确定',
+                        'glyphicon-remove': '取消',
+                        'glyphicon-save': '保存',
+                        'glyphicon-print': '打印',
+                        'glyphicon-download': '下载',
+                        'glyphicon-upload': '上传',
+                        'glyphicon-export': '导出',
+                        'glyphicon-import': '导入'
+                    };
+                    
+                    for (const className of element.classList) {
+                        if (iconClassMap[className]) {
+                            labels.push(iconClassMap[className]);
+                            break;
+                        }
+                    }
+                }
+                
+                // 原有的标签文本查找逻辑
                 // 方法1: 查找前面的所有文本节点和元素
                 function findPrecedingText(element) {
                     const textsFound = [];
@@ -730,6 +782,38 @@ class RealtimeTestRecorder:
             element_class = element_info.get('class', '')
             element_name = element_info.get('name', '')
             element_placeholder = element_info.get('placeholder', '')
+            
+            # 特殊处理图标元素
+            if element_class and 'glyphicon' in element_class:
+                # 如果有标签文本（来自getInputLabel的增强处理），直接使用
+                if label_text:
+                    return f"【{label_text}】按钮"
+                
+                # 尝试从类名中提取图标类型
+                classes = element_class.split()
+                for cls in classes:
+                    if cls.startswith('glyphicon-'):
+                        icon_type = cls.replace('glyphicon-', '')
+                        # 图标类型映射
+                        icon_map = {
+                            'refresh': '刷新',
+                            'search': '搜索',
+                            'plus': '添加',
+                            'minus': '删除',
+                            'edit': '编辑',
+                            'trash': '删除',
+                            'ok': '确定',
+                            'remove': '取消',
+                            'save': '保存',
+                            'print': '打印',
+                            'download': '下载',
+                            'upload': '上传',
+                            'export': '导出',
+                            'import': '导入'
+                        }
+                        if icon_type in icon_map:
+                            return f"【{icon_map[icon_type]}】按钮"
+                        return f"【{icon_type}】按钮"
             
             # 对于输入框，使用标签信息生成友好描述
             if tag_name == 'input':
