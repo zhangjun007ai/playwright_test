@@ -10,12 +10,6 @@ from pathlib import Path
 import uuid
 import tempfile
 import os
-import sys
-
-# 添加项目根目录到 Python 路径
-project_root = str(Path(__file__).parent.parent)
-if project_root not in sys.path:
-    sys.path.insert(0, project_root)
 
 from playwright.async_api import async_playwright, Browser, BrowserContext, Page
 from loguru import logger
@@ -131,32 +125,17 @@ class RealtimeTestRecorder:
             # 启动Playwright
             self.playwright = await async_playwright().start()
             
-            # 启动浏览器，添加性能优化参数
+            # 启动浏览器
             self.browser = await self.playwright.chromium.launch(
                 headless=False,
-                args=[
-                    '--start-maximized',
-                    '--disable-gpu-vsync',  # 禁用垂直同步
-                    '--disable-frame-rate-limit',  # 禁用帧率限制
-                    '--disable-gpu-compositing',  # 禁用GPU合成
-                    '--disable-smooth-scrolling',  # 禁用平滑滚动
-                    '--disable-software-rasterizer',  # 禁用软件光栅化
-                    '--disable-threaded-animation',  # 禁用线程动画
-                    '--disable-threaded-scrolling',  # 禁用线程滚动
-                    '--disable-dev-shm-usage',  # 禁用/dev/shm使用
-                    '--no-sandbox',  # 禁用沙箱
-                    '--disable-setuid-sandbox',  # 禁用setuid沙箱
-                    '--disable-accelerated-2d-canvas',  # 禁用加速2D画布
-                    '--disable-accelerated-video-decode',  # 禁用加速视频解码
-                ]
+                args=['--start-maximized']
             )
             
-            # 创建上下文，添加性能优化设置
+            # 创建上下文
             self.context = await self.browser.new_context(
                 viewport=None,  # 使用全屏
                 record_video_dir=str(self.temp_dir / "videos"),
-                record_video_size={"width": 1280, "height": 720},
-                reduced_motion="reduce"  # 减少动画
+                record_video_size={"width": 1280, "height": 720}
             )
             
             # 开始trace
@@ -166,21 +145,8 @@ class RealtimeTestRecorder:
                 sources=True
             )
             
-            # 创建页面并优化设置
+            # 创建页面
             self.page = await self.context.new_page()
-            
-            # 注入性能优化脚本
-            await self.page.add_init_script("""
-                // 禁用平滑滚动
-                if (CSS.supports('scroll-behavior', 'smooth')) {
-                    document.documentElement.style.setProperty('scroll-behavior', 'auto', 'important');
-                }
-                
-                // 禁用动画
-                document.documentElement.style.setProperty('-webkit-transition', 'none', 'important');
-                document.documentElement.style.setProperty('transition', 'none', 'important');
-                document.documentElement.style.setProperty('animation', 'none', 'important');
-            """)
             
             # 设置基础事件监听器
             await self._setup_basic_event_listeners()
@@ -229,7 +195,7 @@ class RealtimeTestRecorder:
     
     async def _inject_basic_event_script(self):
         """注入基础的事件监听脚本"""
-        script = r"""
+        script = """
         (function() {
             if (window.playwrightRecorderInjected) {
                 return 'already_injected';
@@ -242,12 +208,6 @@ class RealtimeTestRecorder:
             // 输入防抖处理
             const inputTimers = new Map();
             const INPUT_DELAY = 1000; // 1秒防抖延迟
-            
-            // 获取select元素选中选项的文本
-            function getSelectedOptionText(selectElement) {
-                const selectedOption = selectElement.options[selectElement.selectedIndex];
-                return selectedOption ? selectedOption.text : '';
-            }
             
             // 清理标签文本
             function cleanLabelText(text) {
@@ -491,65 +451,55 @@ class RealtimeTestRecorder:
                 return labelText;
             }
             
-            // 记录事件的通用函数
-            function recordEvent(eventType, element, eventData) {
-                try {
-                    const elementInfo = {
-                        tag: element.tagName.toLowerCase(),
-                        type: element.type || '',
-                        id: element.id || '',
-                        name: element.name || '',
-                        class: Array.from(element.classList).join(' '),
-                        value: element.value || '',
-                        text: element.innerText || element.textContent || '',
-                        label: getInputLabel(element)
-                    };
-                    
-                    const eventInfo = {
-                        type: eventType,
-                        element: elementInfo,
-                        eventData: eventData || {}
-                    };
-                    
-                    console.log('RECORDER_EVENT:' + JSON.stringify(eventInfo));
-                } catch (error) {
-                    console.error('RECORDER_ERROR: 记录事件失败:', error);
+            // 获取选择框的选项文本
+            function getSelectOptionText(selectElement, value) {
+                if (selectElement.tagName.toLowerCase() === 'select') {
+                    const options = selectElement.querySelectorAll('option');
+                    for (let option of options) {
+                        if (option.value === value) {
+                            return option.innerText || option.textContent || value;
+                        }
+                    }
                 }
+                return value;
             }
             
-            // 监听select元素的change事件
-            document.addEventListener('change', function(event) {
-                const element = event.target;
-                
-                // 特殊处理select元素
-                if (element.tagName.toLowerCase() === 'select') {
-                    const selectedText = getSelectedOptionText(element);
+            // 基础事件记录函数
+            function recordEvent(eventType, element, eventData = {}) {
+                try {
                     const labelText = getInputLabel(element);
+                    
                     const elementInfo = {
-                        tag: element.tagName.toLowerCase(),
-                        type: element.type || '',
-                        id: element.id || '',
-                        name: element.name || '',
-                        class: Array.from(element.classList).join(' '),
-                        value: element.value,
-                        selectedText: selectedText,  // 添加选中文本
-                        label: labelText
+                        tag: element ? element.tagName.toLowerCase() : '',
+                        id: element ? element.id || '' : '',
+                        class: element ? element.className || '' : '',
+                        text: element ? (element.innerText || element.textContent || '').substring(0, 50) : '',
+                        type: element ? element.type || '' : '',
+                        name: element ? element.name || '' : '',
+                        value: element ? element.value || '' : '',
+                        label: labelText,
+                        placeholder: element ? element.placeholder || '' : ''
                     };
                     
-                    console.log('RECORDER_EVENT:', JSON.stringify({
-                        type: 'select',
+                    const pageInfo = {
+                        url: window.location.href,
+                        title: document.title
+                    };
+                    
+                    const eventPayload = {
+                        eventType: eventType,
                         element: elementInfo,
-                        selectedText: selectedText
-                    }));
-                    return;
+                        page: pageInfo,
+                        eventData: eventData,
+                        timestamp: Date.now()
+                    };
+                    
+                    console.log('RECORDER_EVENT:' + eventType + ':' + JSON.stringify(eventPayload));
+                    
+                } catch (error) {
+                    console.error('RECORDER_DEBUG: 事件记录失败:', error);
                 }
-                
-                // 处理其他输入元素
-                if (element.tagName.toLowerCase() === 'input' || 
-                    element.tagName.toLowerCase() === 'textarea') {
-                    recordInputWithDebounce(element);
-                }
-            });
+            }
             
             // 防抖输入记录函数
             function recordInputWithDebounce(element) {
@@ -575,48 +525,11 @@ class RealtimeTestRecorder:
             
             // 点击事件
             document.addEventListener('click', function(event) {
-                // 特殊处理下拉框点击
-                if (event.target.tagName.toLowerCase() === 'select') {
-                    // 记录点击事件，但不执行任何额外的DOM操作
-                    recordEvent('click', event.target, {
-                        clientX: event.clientX,
-                        clientY: event.clientY,
-                        button: event.button,
-                        isSelect: true
-                    });
-                    return; // 让事件继续自然传播
-                }
-                
-                // 检查是否点击的是下拉框选项
-                let targetElement = event.target;
-                let isSelectOption = false;
-                
-                // 向上查找父元素，检查是否是select的子元素
-                while (targetElement && !isSelectOption) {
-                    if (targetElement.tagName && targetElement.tagName.toLowerCase() === 'option') {
-                        const select = targetElement.closest('select');
-                        if (select) {
-                            isSelectOption = true;
-                            // 记录选择事件，但不执行任何额外的DOM操作
-                            recordEvent('select', select, {
-                                value: targetElement.value,
-                                selectedText: targetElement.text,
-                                optionText: targetElement.text,
-                                fromClick: true
-                            });
-                        }
-                    }
-                    targetElement = targetElement.parentElement;
-                }
-                
-                // 如果不是select相关的点击，记录普通点击事件
-                if (!isSelectOption && event.target.tagName.toLowerCase() !== 'select') {
-                    recordEvent('click', event.target, {
-                        clientX: event.clientX,
-                        clientY: event.clientY,
-                        button: event.button
-                    });
-                }
+                recordEvent('click', event.target, {
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    button: event.button
+                });
             }, true);
             
             // 输入事件（使用防抖）
@@ -690,41 +603,15 @@ class RealtimeTestRecorder:
             
             // 选择改变
             document.addEventListener('change', function(event) {
+                let changeData = { value: event.target.value || '' };
+                
                 if (event.target.tagName.toLowerCase() === 'select') {
-                    const select = event.target;
-                    const selectedOption = select.options[select.selectedIndex];
-                    
-                    // 记录选择事件，但不执行任何额外的DOM操作
-                    recordEvent('select', select, {
-                        value: select.value,
-                        selectedText: selectedOption ? selectedOption.text : '',
-                        optionText: getSelectOptionText(select, select.value),
-                        fromChangeEvent: true
-                    });
-                } else {
-                    let changeData = { value: event.target.value || '' };
-                    recordEvent('change', event.target, changeData);
+                    const selectedOption = event.target.options[event.target.selectedIndex];
+                    changeData.selectedText = selectedOption ? selectedOption.text : '';
+                    changeData.optionText = getSelectOptionText(event.target, event.target.value);
                 }
-            }, true);
-            
-            // 添加focus事件监听，用于处理下拉框获取焦点
-            document.addEventListener('focus', function(event) {
-                if (event.target.tagName.toLowerCase() === 'select') {
-                    // 记录焦点事件
-                    recordEvent('focus', event.target, {
-                        isSelect: true
-                    });
-                }
-            }, true);
-            
-            // 添加blur事件监听，用于处理下拉框失去焦点
-            document.addEventListener('blur', function(event) {
-                if (event.target.tagName.toLowerCase() === 'select') {
-                    // 记录失焦事件
-                    recordEvent('blur', event.target, {
-                        isSelect: true
-                    });
-                }
+                
+                recordEvent('change', event.target, changeData);
             }, true);
             
             console.log('RECORDER_DEBUG: 基础事件监听器注入完成（支持输入防抖和增强的标签识别）');
@@ -779,128 +666,105 @@ class RealtimeTestRecorder:
             # 处理录制器事件
             if text.startswith('RECORDER_EVENT:'):
                 try:
-                    # 移除前缀，只保留 JSON 部分
-                    json_str = text.replace('RECORDER_EVENT:', '').strip()
-                    event_data = json.loads(json_str)
-                    
-                    # 获取事件类型和数据
-                    event_type = event_data.get('type', '')
-                    
-                    # 异步处理事件
-                    if self.loop and event_type:
-                        asyncio.run_coroutine_threadsafe(
-                            self._record_browser_action(event_type, event_data),
-                            self.loop
-                        )
-                    
+                    parts = text.split(':', 2)
+                    if len(parts) >= 3:
+                        event_type = parts[1]
+                        event_data_str = parts[2]
+                        event_data = json.loads(event_data_str)
+                        
+                        # 异步处理事件
+                        if self.loop:
+                            asyncio.run_coroutine_threadsafe(
+                                self._record_browser_action(event_type, event_data),
+                                self.loop
+                            )
+                        
                 except json.JSONDecodeError as e:
-                    logger.error(f"解析事件数据失败: {e}\n原始数据: {text}")
+                    logger.error(f"解析事件数据失败: {e}")
                 except Exception as e:
                     logger.error(f"处理录制器事件失败: {e}")
             
             # 处理调试信息
             elif text.startswith('RECORDER_DEBUG:'):
                 logger.debug(f"录制器调试: {text}")
-            
-            # 处理错误信息
-            elif text.startswith('RECORDER_ERROR:'):
-                logger.error(f"浏览器端错误: {text}")
                 
         except Exception as e:
             logger.error(f"处理控制台消息失败: {e}")
     
     async def _record_browser_action(self, event_type: str, event_data: Dict):
-        """记录浏览器动作"""
+        """记录浏览器操作事件"""
         try:
-            if event_type == "select":
-                element_info = event_data.get("element", {})
-                selected_text = event_data.get("selectedText", "")
-                label_text = element_info.get("label", "").strip()
-                
-                # 构建友好的描述
-                if label_text:
-                    description = f"在【{label_text}】下拉框中选择：{selected_text}"
+            element_info = event_data.get('element', {})
+            page_info = event_data.get('page', {})
+            additional_data = event_data.get('eventData', {})
+            
+            # 使用Playwright分析器分析元素
+            analyzed_element = playwright_analyzer.analyze_element(element_info)
+            
+            # 生成友好的描述
+            element_desc = self._get_element_description(analyzed_element, element_info)
+            
+            # 分离主要描述和技术细节
+            main_desc, tech_details = self._split_element_description(element_desc)
+            
+            # 生成标题（只使用主要描述）
+            if event_type == 'click':
+                title = f"点击{main_desc}"
+                description = f"点击 {element_desc}"  # 详细描述也使用"点击"
+            elif event_type == 'input':
+                value = additional_data.get('value', '')
+                if '输入框' in tech_details or '文本区域' in tech_details:
+                    title = f"在{main_desc}中输入：{value[:20]}{'...' if len(value) > 20 else ''}"
                 else:
-                    description = f"在下拉框中选择：{selected_text}"
+                    title = f"输入文本：{value[:20]}{'...' if len(value) > 20 else ''}"
+                description = f"在 {element_desc} 中输入：{value}"
+            elif event_type == 'keydown':
+                key = additional_data.get('key', '')
+                if key == 'Enter':
+                    title = f"在{main_desc}中按下回车键"
+                elif key == 'Tab':
+                    title = f"按下Tab键切换到下一个元素"
+                elif key == 'Escape':
+                    title = f"按下Escape键"
+                else:
+                    title = f"按键：{key}"
+                description = f"在 {element_desc} 中按下 {key} 键"
+            elif event_type == 'change':
+                selected_text = additional_data.get('selectedText', '')
+                option_text = additional_data.get('optionText', '')
+                value = additional_data.get('value', '')
                 
-                await self._record_action(
-                    action_type="select",
-                    description=description,
-                    element_info=element_info,
-                    additional_data={"selectedText": selected_text}
-                )
+                if selected_text and '下拉选择框' in tech_details:
+                    title = f"在{main_desc}中选择：{selected_text}"
+                elif option_text and '下拉选择框' in tech_details:
+                    title = f"在{main_desc}中选择：{option_text}"
+                elif value and '下拉选择框' in tech_details:
+                    title = f"在{main_desc}中选择：{value}"
+                else:
+                    title = f"修改{main_desc}的值"
+                description = f"修改 {element_desc} 的值为：{value}"
+            elif event_type == 'submit':
+                if '表单' in tech_details:
+                    title = f"提交{main_desc}"
+                else:
+                    title = "提交表单"
+                description = f"提交 {element_desc}"
             else:
-                element_info = event_data.get('element', {})
-                page_info = event_data.get('page', {})
-                additional_data = event_data.get('eventData', {})
-                
-                # 使用Playwright分析器分析元素
-                analyzed_element = playwright_analyzer.analyze_element(element_info)
-                
-                # 生成友好的描述
-                element_desc = self._get_element_description(analyzed_element, element_info)
-                
-                # 分离主要描述和技术细节
-                main_desc, tech_details = self._split_element_description(element_desc)
-                
-                # 生成标题（只使用主要描述）
-                if event_type == 'click':
-                    title = f"点击{main_desc}"
-                    description = f"点击 {element_desc}"  # 详细描述也使用"点击"
-                elif event_type == 'input':
-                    value = additional_data.get('value', '')
-                    if '输入框' in tech_details or '文本区域' in tech_details:
-                        title = f"在{main_desc}中输入：{value[:20]}{'...' if len(value) > 20 else ''}"
-                    else:
-                        title = f"输入文本：{value[:20]}{'...' if len(value) > 20 else ''}"
-                    description = f"在 {element_desc} 中输入：{value}"
-                elif event_type == 'keydown':
-                    key = additional_data.get('key', '')
-                    if key == 'Enter':
-                        title = f"在{main_desc}中按下回车键"
-                    elif key == 'Tab':
-                        title = f"按下Tab键切换到下一个元素"
-                    elif key == 'Escape':
-                        title = f"按下Escape键"
-                    else:
-                        title = f"按键：{key}"
-                    description = f"在 {element_desc} 中按下 {key} 键"
-                elif event_type == 'change':
-                    selected_text = additional_data.get('selectedText', '')
-                    option_text = additional_data.get('optionText', '')
-                    value = additional_data.get('value', '')
-                    
-                    if selected_text and '下拉选择框' in tech_details:
-                        title = f"在{main_desc}中选择：{selected_text}"
-                    elif option_text and '下拉选择框' in tech_details:
-                        title = f"在{main_desc}中选择：{option_text}"
-                    elif value and '下拉选择框' in tech_details:
-                        title = f"在{main_desc}中选择：{value}"
-                    else:
-                        title = f"修改{main_desc}的值"
-                    description = f"修改 {element_desc} 的值为：{value}"
-                elif event_type == 'submit':
-                    if '表单' in tech_details:
-                        title = f"提交{main_desc}"
-                    else:
-                        title = "提交表单"
-                    description = f"提交 {element_desc}"
-                else:
-                    title = f"对{main_desc}执行{event_type}操作"
-                    description = f"对 {element_desc} 执行了 {event_type} 操作"
-                
-                await self._record_action(
-                    action_type=event_type,
-                    url=page_info.get('url', ''),
-                    title=title,
-                    description=description,
-                    element_info=element_info,
-                    additional_data=event_data,
-                    analyzed_element=analyzed_element
-                )
+                title = f"对{main_desc}执行{event_type}操作"
+                description = f"对 {element_desc} 执行了 {event_type} 操作"
+            
+            await self._record_action(
+                action_type=event_type,
+                url=page_info.get('url', ''),
+                title=title,
+                description=description,
+                element_info=element_info,
+                additional_data=event_data,
+                analyzed_element=analyzed_element
+            )
             
         except Exception as e:
-            logger.error(f"记录浏览器动作失败: {e}")
+            logger.error(f"记录浏览器操作失败: {e}")
     
     def _split_element_description(self, element_desc: str) -> Tuple[str, str]:
         """分离元素描述中的主要描述和技术细节"""
@@ -1100,8 +964,14 @@ class RealtimeTestRecorder:
             if not self.session:
                 return
             
-            # 暂时禁用截图功能
+            # 截图
             screenshot_path = ""
+            try:
+                screenshot_filename = f"screenshot_{len(self.session.actions) + 1}_{int(time.time())}.png"
+                screenshot_path = str(settings.SCREENSHOTS_DIR / screenshot_filename)
+                await self.page.screenshot(path=screenshot_path, full_page=True)
+            except Exception as e:
+                logger.warning(f"截图失败: {e}")
             
             # 创建操作记录
             action_record = ActionRecord(
