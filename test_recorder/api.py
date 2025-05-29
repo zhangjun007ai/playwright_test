@@ -596,20 +596,35 @@ async def get_status():
 
 @app.get("/api/sessions")
 async def get_sessions():
-    """获取所有会话"""
+    """获取所有录制会话"""
     try:
-        sessions = file_manager.get_all_sessions()
-        return {
-            "success": True,
-            "sessions": sessions
-        }
+        # 从文件系统加载会话数据
+        sessions_dir = settings.RECORDINGS_DIR
+        session_files = list(sessions_dir.glob("*_session.json"))
+        sessions = []
+        
+        for session_file in session_files:
+            try:
+                with open(session_file, 'r', encoding='utf-8') as f:
+                    session_data = json.load(f)
+                    # 转换时间戳字符串为datetime对象
+                    if 'start_time' in session_data:
+                        session_data['start_time'] = datetime.fromisoformat(session_data['start_time'])
+                    if 'end_time' in session_data:
+                        session_data['end_time'] = datetime.fromisoformat(session_data['end_time'])
+                    sessions.append(session_data)
+            except Exception as e:
+                logger.error(f"加载会话文件失败 {session_file}: {e}")
+                continue
+        
+        # 按开始时间倒序排序
+        sessions.sort(key=lambda x: x.get('start_time', datetime.min), reverse=True)
+        
+        return sessions
+        
     except Exception as e:
         logger.error(f"获取会话列表失败: {e}")
-        return {
-            "success": False,
-            "sessions": [],
-            "error": str(e)
-        }
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/api/sessions/{session_id}")
 async def get_session(session_id: str):

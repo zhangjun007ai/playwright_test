@@ -233,19 +233,44 @@ asyncio.run(main())"""
                         import json
                         additional_data = json.loads(action.additional_data) if action.additional_data else {}
                         select_value = additional_data.get('selectedText', '')
-                        return f'await page.{selector_code}.select_option("{select_value}")'
+                        
+                        # 生成更平滑的选择代码
+                        code = [
+                            f'# 定位并等待下拉框元素',
+                            f'select_element = page.locator({best_selector})',
+                            f'await select_element.wait_for(state="visible")',
+                            f'# 直接选择选项，不需要额外的点击',
+                            f'await select_element.select_option(label="{select_value}")',
+                            f'# 验证选择是否成功',
+                            f'selected_text = await select_element.evaluate("el => el.options[el.selectedIndex].text")',
+                            f'if selected_text != "{select_value}":',
+                            f'    raise Exception(f"选择验证失败：期望 {select_value}，实际 {{selected_text}}")'
+                        ]
+                        return '\n    '.join(code)
                     except:
                         return f'await page.{selector_code}.click()'
                 
                 else:  # click, keypress
-                    return f'await page.{selector_code}.click()'
+                    try:
+                        import json
+                        additional_data = json.loads(action.additional_data) if action.additional_data else {}
+                        # 如果是下拉框的点击，只等待元素可见
+                        if additional_data.get('isSelect'):
+                            code = [
+                                f'# 等待下拉框元素可见',
+                                f'await page.{selector_code}.wait_for(state="visible")'
+                            ]
+                            return '\n    '.join(code)
+                        return f'await page.{selector_code}.click()'
+                    except:
+                        return f'await page.{selector_code}.click()'
             
             else:
                 return f"# 操作类型: {action.action_type}"
                 
         except Exception as e:
-            logger.error(f"生成单个操作代码失败: {e}")
-            return f"# 代码生成失败: {str(e)}"
+            logger.error(f"生成操作代码失败: {e}")
+            return f"# 生成代码失败: {str(e)}"
     
     def optimize_code(self, code: str) -> str:
         """优化生成的代码"""

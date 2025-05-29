@@ -512,7 +512,7 @@ class TestRecorderApp {
         
         switch (actionType) {
             case 'click':
-                return `点击了 ${elementInfo.tagName || '元素'}`;
+                return `点击 ${elementInfo.tagName || '元素'}`;
             case 'fill':
                 return `在输入框中输入了内容`;
             case 'select':
