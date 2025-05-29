@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>停止按钮测试页面</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .console-output {
+            background: #000;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 12px;
+            height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        .status-info {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container test-container">
+        <h1 class="text-center mb-4">🔧 停止按钮功能测试</h1>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5>按钮测试区</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-success" id="startBtn">
+                                <i class="bi bi-play-circle"></i> 开始录制
+                            </button>
+                            <button type="button" class="btn btn-danger" id="stopBtn" disabled>
+                                <i class="bi bi-stop-circle"></i> 停止录制
+                            </button>
+                            <button type="button" class="btn btn-warning" onclick="toggleRecordingState()">
+                                <i class="bi bi-arrow-repeat"></i> 切换录制状态
+                            </button>
+                            <button type="button" class="btn btn-info" onclick="testAPI()">
+                                <i class="bi bi-cloud-arrow-down"></i> 测试API
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="runDiagnostics()">
+                                <i class="bi bi-bug"></i> 运行诊断
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="status-info">
+                    <h6>当前状态</h6>
+                    <p>录制状态: <span id="recording-status" class="badge bg-secondary">未知</span></p>
+                    <p>停止按钮: <span id="stop-btn-status" class="badge bg-secondary">未知</span></p>
+                    <p>开始按钮: <span id="start-btn-status" class="badge bg-secondary">未知</span></p>
+                    <p>最后操作: <span id="last-action">无</span></p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="console-output" id="console">
+            [系统] 停止按钮测试页面已加载<br>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // 全局变量
+        let isRecording = false;
+        let testConsole = document.getElementById('console');
+        
+        // 日志函数
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const colors = {
+                'info': '#0f0',
+                'warn': '#ff0',
+                'error': '#f00',
+                'success': '#0f0'
+            };
+            const color = colors[type] || '#0f0';
+            testConsole.innerHTML += `<span style="color: ${color}">[${timestamp}] ${message}</span><br>`;
+            testConsole.scrollTop = testConsole.scrollHeight;
+            console.log(`[${type.toUpperCase()}] ${message}`);
+        }
+        
+        // 更新状态显示
+        function updateStatusDisplay() {
+            document.getElementById('recording-status').textContent = isRecording ? '录制中' : '未录制';
+            document.getElementById('recording-status').className = `badge ${isRecording ? 'bg-success' : 'bg-secondary'}`;
+            
+            const stopBtn = document.getElementById('stopBtn');
+            const startBtn = document.getElementById('startBtn');
+            
+            document.getElementById('stop-btn-status').textContent = stopBtn.disabled ? '禁用' : '启用';
+            document.getElementById('stop-btn-status').className = `badge ${stopBtn.disabled ? 'bg-danger' : 'bg-success'}`;
+            
+            document.getElementById('start-btn-status').textContent = startBtn.disabled ? '禁用' : '启用';
+            document.getElementById('start-btn-status').className = `badge ${startBtn.disabled ? 'bg-danger' : 'bg-success'}`;
+        }
+        
+        // 切换录制状态（模拟）
+        function toggleRecordingState() {
+            isRecording = !isRecording;
+            log(`手动切换录制状态为: ${isRecording}`, 'info');
+            updateUI();
+        }
+        
+        // 更新UI状态
+        function updateUI() {
+            const stopBtn = document.getElementById('stopBtn');
+            const startBtn = document.getElementById('startBtn');
+            
+            if (isRecording) {
+                stopBtn.disabled = false;
+                stopBtn.className = 'btn btn-danger';
+                startBtn.disabled = true;
+            } else {
+                stopBtn.disabled = true;
+                stopBtn.className = 'btn btn-secondary';
+                startBtn.disabled = false;
+            }
+            
+            updateStatusDisplay();
+            document.getElementById('last-action').textContent = `更新UI状态 (${new Date().toLocaleTimeString()})`;
+        }
+        
+        // 测试API
+        async function testAPI() {
+            log('开始测试API调用...', 'info');
+            
+            try {
+                const response = await fetch('/api/recording/stop', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                log(`API响应状态: ${response.status} ${response.statusText}`, 'info');
+                
+                const result = await response.json();
+                log(`API响应内容: ${JSON.stringify(result, null, 2)}`, 'success');
+                
+                if (result.success) {
+                    log('API调用成功!', 'success');
+                } else {
+                    log(`API调用失败: ${result.message || result.error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`API调用异常: ${error.message}`, 'error');
+            }
+        }
+        
+        // 运行诊断
+        function runDiagnostics() {
+            log('开始运行诊断...', 'info');
+            
+            // 检查元素
+            const stopBtn = document.getElementById('stopBtn');
+            const startBtn = document.getElementById('startBtn');
+            
+            log(`停止按钮元素: ${stopBtn ? '存在' : '不存在'}`, stopBtn ? 'success' : 'error');
+            log(`开始按钮元素: ${startBtn ? '存在' : '不存在'}`, startBtn ? 'success' : 'error');
+            
+            if (stopBtn) {
+                log(`停止按钮ID: ${stopBtn.id}`, 'info');
+                log(`停止按钮类名: ${stopBtn.className}`, 'info');
+                log(`停止按钮禁用状态: ${stopBtn.disabled}`, 'info');
+                log(`停止按钮类型: ${stopBtn.type}`, 'info');
+            }
+            
+            // 检查事件监听器
+            log('检查事件监听器...', 'info');
+            try {
+                const listeners = getEventListeners ? getEventListeners(stopBtn) : null;
+                if (listeners) {
+                    log(`事件监听器: ${JSON.stringify(Object.keys(listeners))}`, 'info');
+                } else {
+                    log('无法获取事件监听器信息（正常）', 'warn');
+                }
+            } catch (e) {
+                log('事件监听器检查失败（正常）', 'warn');
+            }
+            
+            // 检查全局变量
+            log(`isRecording变量: ${isRecording}`, 'info');
+            log(`fetch函数: ${typeof fetch}`, 'info');
+            log(`bootstrap: ${typeof bootstrap}`, 'info');
+            
+            log('诊断完成', 'success');
+        }
+        
+        // 绑定事件监听器
+        document.addEventListener('DOMContentLoaded', function() {
+            log('DOM加载完成，绑定事件监听器...', 'info');
+            
+            const stopBtn = document.getElementById('stopBtn');
+            const startBtn = document.getElementById('startBtn');
+            
+            // 开始按钮
+            if (startBtn) {
+                startBtn.addEventListener('click', function() {
+                    log('开始按钮被点击', 'info');
+                    isRecording = true;
+                    updateUI();
+                    document.getElementById('last-action').textContent = '点击开始按钮';
+                });
+            }
+            
+            // 停止按钮 - 多重绑定
+            if (stopBtn) {
+                // 方法1: addEventListener
+                stopBtn.addEventListener('click', async function(e) {
+                    log('停止按钮被点击 (addEventListener)', 'warn');
+                    e.preventDefault();
+                    
+                    if (stopBtn.disabled) {
+                        log('停止按钮当前被禁用，忽略点击', 'warn');
+                        return;
+                    }
+                    
+                    document.getElementById('last-action').textContent = '点击停止按钮';
+                    
+                    // 模拟API调用
+                    stopBtn.disabled = true;
+                    stopBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> 处理中...';
+                    
+                    try {
+                        await testAPI();
+                        isRecording = false;
+                        updateUI();
+                        log('停止录制处理完成', 'success');
+                    } catch (error) {
+                        log(`停止录制失败: ${error.message}`, 'error');
+                        updateUI();
+                    }
+                });
+                
+                // 方法2: onclick
+                stopBtn.onclick = function() {
+                    log('停止按钮被点击 (onclick)', 'warn');
+                };
+                
+                log('停止按钮事件监听器绑定完成', 'success');
+            } else {
+                log('停止按钮不存在!', 'error');
+            }
+            
+            updateUI();
+            updateStatusDisplay();
+            log('事件绑定完成', 'success');
+        });
+        
+        // 页面加载完成
+        window.addEventListener('load', function() {
+            log('页面完全加载完成', 'success');
+            runDiagnostics();
+        });
+    </script>
+</body>
+</html> 

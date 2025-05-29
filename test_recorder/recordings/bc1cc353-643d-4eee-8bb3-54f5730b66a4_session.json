@@ -1,0 +1,32 @@
+{
+  "id": "bc1cc353-643d-4eee-8bb3-54f5730b66a4",
+  "name": "实时显示测试",
+  "description": "测试WebSocket实时消息传输",
+  "start_time": "2025-05-28 20:47:48.875499",
+  "end_time": "2025-05-28 20:47:52.924434",
+  "actions": [
+    {
+      "id": "b00911e0-e584-4b3b-ab53-61430f9fccb5",
+      "session_id": "bc1cc353-643d-4eee-8bb3-54f5730b66a4",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 20:47:51.398420",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "导航到: about:blank",
+      "page_text": "",
+      "additional_data": "{\"url\": \"about:blank\", \"action\": \"navigate\"}",
+      "screenshot_path": "",
+      "description": "打开网页: about:blank",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

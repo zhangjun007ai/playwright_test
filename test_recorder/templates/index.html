@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测试用例录制系统</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    <style>
+        .recording-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .action-item {
+            border-left: 4px solid #007bff;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        .action-item:hover {
+            background-color: #f8f9fa;
+            transform: translateX(5px);
+        }
+        .screenshot-preview {
+            max-width: 100%;
+            height: auto;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .screenshot-preview:hover {
+            transform: scale(1.05);
+        }
+        .code-block {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 10px;
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+        }
+        .playwright-code {
+            background-color: #263238;
+            color: #eeffff;
+            border: 1px solid #37474f;
+            border-radius: 6px;
+            padding: 12px;
+            font-family: 'Fira Code', 'Monaco', 'Consolas', monospace;
+            font-size: 13px;
+            line-height: 1.4;
+            overflow-x: auto;
+            white-space: pre;
+            margin: 8px 0;
+        }
+        .playwright-code-container {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            padding: 4px 8px;
+            font-size: 11px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border-radius: 3px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        .copy-btn:hover {
+            opacity: 1;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .action-type-badge {
+            font-size: 10px;
+            padding: 2px 6px;
+        }
+        .element-info {
+            font-size: 11px;
+            color: #6c757d;
+            margin-top: 4px;
+        }
+        .action-counter {
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        .realtime-section {
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            background: #ffffff;
+        }
+        .full-code-section {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        .nav-tabs .nav-link.active {
+            background-color: #007bff;
+            border-color: #007bff;
+            color: white;
+        }
+        .tab-content {
+            border: 1px solid #dee2e6;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 20px;
+            background: white;
+        }
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+        .status-recording {
+            background-color: #dc3545;
+            animation: pulse 1.5s infinite;
+        }
+        .status-idle {
+            background-color: #6c757d;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        .highlight-code {
+            background: linear-gradient(90deg, rgba(0, 123, 255, 0.1) 0%, rgba(0, 123, 255, 0.05) 100%);
+            border-left: 3px solid #007bff;
+            animation: highlightFade 2s ease-out;
+        }
+        @keyframes highlightFade {
+            0% { background: rgba(0, 123, 255, 0.3); }
+            100% { background: rgba(0, 123, 255, 0.1); }
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- 录制状态指示器 -->
+    <div class="recording-status">
+        <div class="alert alert-info" id="status-indicator">
+            <span class="status-indicator status-idle" id="status-dot"></span>
+            <span id="status-text">系统就绪</span>
+        </div>
+        
+        <!-- 调试面板 -->
+        <div class="alert alert-secondary mt-2" id="debug-panel" style="font-size: 12px;">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong>🔧 调试信息</strong>
+                <button class="btn btn-sm btn-outline-secondary" onclick="toggleDebugPanel()" style="font-size: 10px;">
+                    隐藏
+                </button>
+            </div>
+            <div id="debug-info">
+                <div>WebSocket: <span id="debug-ws-status" class="badge bg-secondary">未连接</span></div>
+                <div>已处理消息: <span id="debug-message-count">0</span></div>
+                <div>操作计数: <span id="debug-action-count">0</span></div>
+                <div>代码行数: <span id="debug-code-lines">0</span></div>
+                <div>最后活动: <span id="debug-last-activity">无</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- 左侧控制面板 -->
+            <div class="col-md-3">
+                <div class="card mt-3">
+                    <div class="card-header">
+                        <h5 class="mb-0">📹 录制控制</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="recording-form">
+                            <div class="mb-3">
+                                <label for="testName" class="form-label">测试用例名称</label>
+                                <input type="text" class="form-control" id="testName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="testDescription" class="form-label">描述</label>
+                                <textarea class="form-control" id="testDescription" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="recorderType" class="form-label">录制器类型</label>
+                                <select class="form-select" id="recorderType">
+                                    <option value="realtime">实时录制器</option>
+                                    <option value="inspector">Playwright Inspector</option>
+                                </select>
+                                <div class="form-text">
+                                    <small id="recorder-help-text">实时录制器：通过浏览器扩展捕获操作</small>
+                                </div>
+                            </div>
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-success" id="startBtn">
+                                    <i class="bi bi-play-circle"></i> 开始录制
+                                </button>
+                                <button type="button" class="btn btn-danger" id="stopBtn" disabled>
+                                    <i class="bi bi-stop-circle"></i> 停止录制
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <hr>
+                        
+                        <div class="mb-3">
+                            <h6>实时统计</h6>
+                            <p class="mb-1">操作数量: <span id="action-count" class="badge bg-primary">0</span></p>
+                            <p class="mb-1">录制时长: <span id="recording-time">00:00</span></p>
+                            <p class="mb-0">连接状态: <span id="ws-status" class="badge bg-secondary">未连接</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 主要内容区域 -->
+            <div class="col-md-9">
+                <div class="mt-3">
+                    <h2 class="mb-4">🎭 Playwright 测试用例录制系统</h2>
+                    
+                    <!-- 功能标签页 -->
+                    <ul class="nav nav-tabs" id="main-tabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="realtime-tab" data-bs-toggle="tab" data-bs-target="#realtime" type="button" role="tab">
+                                🔴 实时录制
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="playwright-code-tab" data-bs-toggle="tab" data-bs-target="#playwright-code" type="button" role="tab">
+                                📄 Playwright代码
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="testcase-tab" data-bs-toggle="tab" data-bs-target="#testcase" type="button" role="tab">
+                                📋 预览测试用例
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="export-tab" data-bs-toggle="tab" data-bs-target="#export" type="button" role="tab">
+                                💾 导出管理
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="main-tab-content">
+                        <!-- 实时录制标签页 -->
+                        <div class="tab-pane fade show active" id="realtime" role="tabpanel">
+                            <div class="realtime-section">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="mb-0">📊 实时操作记录</h5>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="clearRealtimeDisplay()">
+                                        清空显示
+                                    </button>
+                                </div>
+                                <div id="realtime-actions">
+                                    <div class="text-center text-muted py-4">
+                                        <i class="bi bi-clock-history fs-1"></i>
+                                        <p class="mt-2">等待录制操作...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Playwright代码标签页 -->
+                        <div class="tab-pane fade" id="playwright-code" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">🎭 Playwright Inspector 格式代码</h5>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="copyFullCode()">
+                                        📋 复制全部代码
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary" onclick="refreshPlaywrightCode()">
+                                        🔄 刷新代码
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- 实时生成的代码行 -->
+                            <div class="full-code-section">
+                                <h6>实时生成的代码行</h6>
+                                <div id="realtime-code-lines" class="realtime-section">
+                                    <div class="text-center text-muted py-3">
+                                        <p>开始录制后，这里将显示实时生成的Playwright代码行...</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 完整代码预览 -->
+                            <div class="full-code-section">
+                                <h6>完整代码预览</h6>
+                                <div class="playwright-code-container">
+                                    <button class="copy-btn" onclick="copyFullCode()">复制</button>
+                                    <pre class="playwright-code" id="full-playwright-code">
+# 录制完成后将显示完整的Playwright代码
+# 代码格式与Playwright Inspector完全一致
+                                    </pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 预览测试用例标签页 -->
+                        <div class="tab-pane fade" id="testcase" role="tabpanel">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">📋 AI生成测试用例预览</h5>
+                                <button class="btn btn-sm btn-primary" onclick="generateTestCase()">
+                                    🤖 生成测试用例
+                                </button>
+                            </div>
+                            <div id="testcase-preview">
+                                <div class="text-center text-muted py-4">
+                                    <i class="bi bi-file-text fs-1"></i>
+                                    <p class="mt-2">录制完成后可生成测试用例</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 导出管理标签页 -->
+                        <div class="tab-pane fade" id="export" role="tabpanel">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h5>💾 导出设置</h5>
+                                    <form id="export-form">
+                                        <div class="mb-3">
+                                            <label class="form-label">导出格式</label>
+                                            <select class="form-select" id="export-format">
+                                                <option value="excel">Excel表格</option>
+                                                <option value="word">Word文档</option>
+                                                <option value="json">JSON数据</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="checkbox" id="include-screenshots" checked>
+                                                <label class="form-check-label" for="include-screenshots">
+                                                    包含截图
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="author" class="form-label">作者</label>
+                                            <input type="text" class="form-control" id="author" value="测试工程师">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="version" class="form-label">版本</label>
+                                            <input type="text" class="form-control" id="version" value="1.0">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="remarks" class="form-label">备注</label>
+                                            <textarea class="form-control" id="remarks" rows="2"></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-success" disabled id="export-btn">
+                                            📤 导出测试用例
+                                        </button>
+                                    </form>
+                                </div>
+                                <div class="col-md-6">
+                                    <h5>📁 历史记录</h5>
+                                    <div id="sessions-list">
+                                        <div class="text-muted">正在加载...</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框：截图预览 -->
+    <div class="modal fade" id="screenshotModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">截图预览</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="modal-screenshot" src="" class="img-fluid" alt="截图">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="/static/app.js"></script>
+</body>
+</html> 

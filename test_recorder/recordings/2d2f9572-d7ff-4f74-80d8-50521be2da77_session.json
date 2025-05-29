@@ -1,0 +1,336 @@
+{
+  "id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+  "name": "给goon给你",
+  "description": "",
+  "start_time": "2025-05-29 13:49:07.505908",
+  "end_time": "2025-05-29 13:52:47.262307",
+  "actions": [
+    {
+      "id": "223a75b2-7bca-4b06-89f6-bf4c14c225cb",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 13:49:08.739372",
+      "element_info": {
+        "type": "window",
+        "window_id": "640ec355-5844-473f-a910-e43695fce09d",
+        "parent_id": null,
+        "is_popup": false
+      },
+      "page_url": "about:blank",
+      "page_title": "",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748497748.png",
+      "description": "新窗口创建: about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "3f9dbfe3-aa53-4284-a219-4bcb9125dd66",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:49:08.854429",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "导航到: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748497748.png",
+      "description": "页面导航到: about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "29f7ef7e-523b-44b8-b683-f10dea5192ca",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "load",
+      "timestamp": "2025-05-29 13:49:08.910431",
+      "element_info": {
+        "type": "load",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "页面加载完成: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748497748.png",
+      "description": "页面 about:blank 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "718d5a60-d6ad-4aca-911e-0a7e9520ad29",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:49:08.951072",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "浏览器已启动",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748497748.png",
+      "description": "录制开始，浏览器已准备就绪",
+      "expected_result": ""
+    },
+    {
+      "id": "cc0c2020-1687-49bd-b54c-6229e13c96d7",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:49:08.993535",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "640ec355-5844-473f-a910-e43695fce09d",
+        "old_url": "about:blank",
+        "new_url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748497748.png",
+      "description": "窗口导航: about:blank -> about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "d4de92fb-52f5-4215-ba77-20be60e38cca",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:49:24.957667",
+      "element_info": {
+        "type": "navigation",
+        "url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "导航到: https://www.baidu.com/",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748497764.png",
+      "description": "页面导航到: https://www.baidu.com/",
+      "expected_result": ""
+    },
+    {
+      "id": "a791b67b-89f3-4aac-a413-cb058ba15d0c",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:49:25.096676",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "640ec355-5844-473f-a910-e43695fce09d",
+        "old_url": "about:blank",
+        "new_url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "百度一下，你就知道",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748497764.png",
+      "description": "窗口导航: about:blank -> https://www.baidu.com/",
+      "expected_result": ""
+    },
+    {
+      "id": "1704c002-c995-4830-bfd4-fbc77846be4e",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "load",
+      "timestamp": "2025-05-29 13:49:25.155222",
+      "element_info": {
+        "type": "load",
+        "url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "页面加载完成: https://www.baidu.com/",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748497764.png",
+      "description": "页面 https://www.baidu.com/ 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "0fd0ad6c-792b-4d48-b7b3-e1d2d18e5b85",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "click",
+      "timestamp": "2025-05-29 13:49:31.408924",
+      "element_info": {
+        "tag": "span",
+        "id": "",
+        "class": "title-content-title",
+        "text": "总书记深情寄望“小树苗”",
+        "type": "",
+        "name": "",
+        "value": "",
+        "xpath": "//*[@id=\"hotsearch-content-wrapper\"]/li[@class=\"hotsearch-item\"]/a[@class=\"title-content\"]/span",
+        "cssSelector": "span.title-content-title",
+        "enhanced": true,
+        "tagPath": "",
+        "innerText": "",
+        "textContent": "",
+        "href": "",
+        "src": "",
+        "alt": "",
+        "title": "",
+        "target": "",
+        "placeholder": "",
+        "required": false,
+        "disabled": false,
+        "readonly": false,
+        "checked": false,
+        "selected": false,
+        "position": {
+          "x": 339,
+          "y": 382,
+          "width": 171,
+          "height": 18
+        },
+        "style": {
+          "visible": true,
+          "display": "",
+          "visibility": "",
+          "opacity": "",
+          "backgroundColor": "",
+          "color": "",
+          "fontSize": "",
+          "fontFamily": ""
+        },
+        "attributes": {},
+        "dataAttributes": {},
+        "parent": {
+          "tag": "a",
+          "id": "",
+          "class": "title-content"
+        },
+        "accessibility": {
+          "role": "",
+          "ariaLabel": "",
+          "ariaDescribedby": ""
+        }
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "百度一下，你就知道",
+      "page_text": "",
+      "additional_data": "{\"eventData\": {\"button\": 0, \"ctrlKey\": false, \"shiftKey\": false, \"altKey\": false, \"clientX\": 410, \"clientY\": 385}, \"pageContext\": {\"url\": \"https://www.baidu.com/\", \"title\": \"\\u767e\\u5ea6\\u4e00\\u4e0b\\uff0c\\u4f60\\u5c31\\u77e5\\u9053\", \"timestamp\": 1748497771266}, \"enhancedInfo\": true, \"originalEventType\": \"click\", \"timestamp\": 1748497771269.523}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_9_1748497771.png",
+      "description": "CLICK 类名为'title-content-title'的span元素, 内容: '总书记深情寄望“小树苗”', 位置: (339, 382), XPath: //*[@id=\"hotsearch-content-wrapper\"]/li[@class=\"hotsearch-item\"]/a[@class=\"title-content\"]/span, CSS路径: span.title-content-title, 父元素: a.title-content",
+      "expected_result": ""
+    },
+    {
+      "id": "0fa3bc3a-8091-4aa7-b2c8-b94f19b2ad16",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 13:49:32.082449",
+      "element_info": {
+        "type": "window",
+        "window_id": "e5f2047a-db75-4832-a362-3519e43f7cc4",
+        "parent_id": "640ec355-5844-473f-a910-e43695fce09d",
+        "is_popup": true
+      },
+      "page_url": "https://www.baidu.com/s?wd=%E6%80%BB%E4%B9%A6%E8%AE%B0%E6%B7%B1%E6%83%85%E5%AF%84%E6%9C%9B%E2%80%9C%E5%B0%8F%E6%A0%91%E8%8B%97%E2%80%9D&sa=fyb_n_homepage&rsv_dl=fyb_n_homepage&from=super&cl=3&tn=baidutop10&fr=top1000&rsv_idx=2&hisfilter=1",
+      "page_title": "总书记深情寄望“小树苗”_百度搜索",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_10_1748497772.png",
+      "description": "新窗口创建: 总书记深情寄望“小树苗”_百度搜索",
+      "expected_result": ""
+    },
+    {
+      "id": "eebda8fb-2104-476a-bbd2-6470e0a15746",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 13:49:43.813137",
+      "element_info": {
+        "type": "window",
+        "window_id": "dbd26e42-a8b3-4159-ba07-b94f1003ade7",
+        "parent_id": "e5f2047a-db75-4832-a362-3519e43f7cc4",
+        "is_popup": true
+      },
+      "page_url": "https://baijiahao.baidu.com/s?id=1833417875030306763&wfr=spider&for=pc",
+      "page_title": "时政微观察丨总书记深情寄望“小树苗”",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_11_1748497783.png",
+      "description": "新窗口创建: 时政微观察丨总书记深情寄望“小树苗”",
+      "expected_result": ""
+    },
+    {
+      "id": "e71a935f-2816-4c51-aca5-931eb8192203",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 13:49:51.533603",
+      "element_info": {
+        "type": "window",
+        "window_id": "5194b093-7edc-43b0-9c4a-dba14a197bde",
+        "parent_id": "dbd26e42-a8b3-4159-ba07-b94f1003ade7",
+        "is_popup": true
+      },
+      "page_url": "https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_9050388015599591431%22%7D&n_type=1&p_from=3",
+      "page_title": "睡前吃碳水能助眠？怎么吃大有讲究",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_12_1748497791.png",
+      "description": "新窗口创建: 睡前吃碳水能助眠？怎么吃大有讲究",
+      "expected_result": ""
+    },
+    {
+      "id": "06bae1da-1905-4b81-83a6-86f863df4640",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:50:08.189596",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "5194b093-7edc-43b0-9c4a-dba14a197bde",
+        "old_url": "https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_9050388015599591431%22%7D&n_type=1&p_from=3",
+        "new_url": "http://192.168.1.128/login"
+      },
+      "page_url": "http://192.168.1.128/login",
+      "page_title": "登录系统",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_13_1748497808.png",
+      "description": "窗口导航: https://mbd.baidu.com/newspage/data/landingsuper?context=%7B%22nid%22%3A%22news_9050388015599591431%22%7D&n_type=1&p_from=3 -> http://192.168.1.128/login",
+      "expected_result": ""
+    },
+    {
+      "id": "e5b3d3b2-6ad5-4ee0-8509-0c66d53319d2",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:50:16.683591",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "5194b093-7edc-43b0-9c4a-dba14a197bde",
+        "old_url": "http://192.168.1.128/login",
+        "new_url": "http://192.168.1.128/index"
+      },
+      "page_url": "http://192.168.1.128/index",
+      "page_title": "系统首页",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_14_1748497816.png",
+      "description": "窗口导航: http://192.168.1.128/login -> http://192.168.1.128/index",
+      "expected_result": ""
+    },
+    {
+      "id": "a10a34bf-00de-43f7-a968-195a02a041ed",
+      "session_id": "2d2f9572-d7ff-4f74-80d8-50521be2da77",
+      "action_type": "window_close",
+      "timestamp": "2025-05-29 13:52:47.071050",
+      "element_info": {
+        "type": "window",
+        "window_id": "5194b093-7edc-43b0-9c4a-dba14a197bde"
+      },
+      "page_url": "http://192.168.1.128/index",
+      "page_title": "系统首页",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_15_1748497967.png",
+      "description": "窗口关闭: 系统首页",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

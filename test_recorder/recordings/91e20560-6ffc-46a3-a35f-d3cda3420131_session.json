@@ -1,0 +1,32 @@
+{
+  "id": "91e20560-6ffc-46a3-a35f-d3cda3420131",
+  "name": "给goon给你",
+  "description": "",
+  "start_time": "2025-05-28 20:49:59.634327",
+  "end_time": "2025-05-28 20:53:23.061050",
+  "actions": [
+    {
+      "id": "5bc3adca-2574-4b4c-9052-50ed243c8996",
+      "session_id": "91e20560-6ffc-46a3-a35f-d3cda3420131",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 20:50:02.154845",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "导航到: about:blank",
+      "page_text": "",
+      "additional_data": "{\"url\": \"about:blank\", \"action\": \"navigate\"}",
+      "screenshot_path": "",
+      "description": "打开网页: about:blank",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

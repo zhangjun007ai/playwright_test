@@ -1,0 +1,29 @@
+{
+  "id": "885d4f16-c44d-47b8-90ab-12ff17e0dda6",
+  "name": "Windows录制器测试",
+  "description": "测试Windows录制器功能",
+  "start_time": "2025-05-28 13:03:45.982553",
+  "end_time": "2025-05-28 13:04:21.870940",
+  "actions": [
+    {
+      "id": "4ba56803-3a9d-4798-804f-bc2903130846",
+      "session_id": "885d4f16-c44d-47b8-90ab-12ff17e0dda6",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 13:03:48.497687",
+      "element_info": {},
+      "page_url": "about:blank",
+      "page_title": "",
+      "page_text": "",
+      "additional_data": "{\"url\": \"about:blank\"}",
+      "screenshot_path": "",
+      "description": "",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

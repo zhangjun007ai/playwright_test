@@ -1,0 +1,290 @@
+{
+  "id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+  "name": "给goon给你",
+  "description": "",
+  "start_time": "2025-05-29 13:04:45.999115",
+  "end_time": "2025-05-29 13:28:14.698417",
+  "actions": [
+    {
+      "id": "93a85f96-1650-4210-94bf-e8c452255e6a",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 13:04:47.178486",
+      "element_info": {
+        "type": "window",
+        "window_id": "04c18aa8-ded4-4e86-8577-41f8c78f63dd",
+        "parent_id": null,
+        "is_popup": false
+      },
+      "page_url": "about:blank",
+      "page_title": "",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748495087.png",
+      "description": "新窗口创建: about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "22cd2417-cd07-4cad-9ff7-653cdf75ad42",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:04:47.264647",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "导航到: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748495087.png",
+      "description": "页面导航到: about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "0e7f05ae-6643-4844-8cec-ca813807d74d",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "load",
+      "timestamp": "2025-05-29 13:04:47.308736",
+      "element_info": {
+        "type": "load",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "页面加载完成: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748495087.png",
+      "description": "页面 about:blank 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "441520a8-98b5-4bc9-abf9-9ca9ee73e815",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:04:47.348373",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "浏览器已启动",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748495087.png",
+      "description": "录制开始，浏览器已准备就绪",
+      "expected_result": ""
+    },
+    {
+      "id": "de04c84d-be55-4730-b6d6-c83c821dca93",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:04:47.390465",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "04c18aa8-ded4-4e86-8577-41f8c78f63dd",
+        "old_url": "about:blank",
+        "new_url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748495087.png",
+      "description": "窗口导航: about:blank -> about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "58ce1f8e-86a0-4f9e-b7f2-ff61d2efb348",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:05:01.386992",
+      "element_info": {
+        "type": "navigation",
+        "url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "导航到: https://www.baidu.com/",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748495100.png",
+      "description": "页面导航到: https://www.baidu.com/",
+      "expected_result": ""
+    },
+    {
+      "id": "6f309876-7a5b-4cfe-815d-9fb78a85368f",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:05:01.497096",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "04c18aa8-ded4-4e86-8577-41f8c78f63dd",
+        "old_url": "about:blank",
+        "new_url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "百度一下，你就知道",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748495100.png",
+      "description": "窗口导航: about:blank -> https://www.baidu.com/",
+      "expected_result": ""
+    },
+    {
+      "id": "aaa49400-b496-4289-91a6-8575a5cf9c51",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "load",
+      "timestamp": "2025-05-29 13:05:01.560631",
+      "element_info": {
+        "type": "load",
+        "url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "页面加载完成: https://www.baidu.com/",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748495101.png",
+      "description": "页面 https://www.baidu.com/ 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "e8de50a3-a0ea-4105-b7aa-357082d22561",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 13:05:10.937272",
+      "element_info": {
+        "type": "window",
+        "window_id": "53b2de84-a32d-427f-9e6e-726db9043968",
+        "parent_id": "04c18aa8-ded4-4e86-8577-41f8c78f63dd",
+        "is_popup": true
+      },
+      "page_url": "https://www.baidu.com/s?wd=%E2%80%9C%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80+%E5%8F%8B%E8%B0%8A%E7%AC%AC%E5%8D%81%E5%9B%9B%E2%80%9D&sa=fyb_n_homepage&rsv_dl=fyb_n_homepage&from=super&cl=3&tn=baidutop10&fr=top1000&rsv_idx=2&hisfilter=1",
+      "page_title": "“比赛第一 友谊第十四”_百度搜索",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_9_1748495110.png",
+      "description": "新窗口创建: “比赛第一 友谊第十四”_百度搜索",
+      "expected_result": ""
+    },
+    {
+      "id": "f8e2d7f9-f74e-4832-98ff-82fb25a8f573",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 13:05:18.810117",
+      "element_info": {
+        "type": "window",
+        "window_id": "6dff4725-6bcb-4e7a-b701-a6b76568b805",
+        "parent_id": "53b2de84-a32d-427f-9e6e-726db9043968",
+        "is_popup": true
+      },
+      "page_url": "https://baike.baidu.com/item/%E6%B1%9F%E8%8B%8F%E7%9C%81%E5%9F%8E%E5%B8%82%E8%B6%B3%E7%90%83%E8%81%94%E8%B5%9B/65674721?fr=api_baidu_opex_festival",
+      "page_title": "江苏省城市足球联赛_百度百科",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_10_1748495118.png",
+      "description": "新窗口创建: 江苏省城市足球联赛_百度百科",
+      "expected_result": ""
+    },
+    {
+      "id": "e1d4e771-a49e-4b77-b134-ad7ab3983bbf",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:05:24.241789",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "6dff4725-6bcb-4e7a-b701-a6b76568b805",
+        "old_url": "https://baike.baidu.com/item/%E6%B1%9F%E8%8B%8F%E7%9C%81%E5%9F%8E%E5%B8%82%E8%B6%B3%E7%90%83%E8%81%94%E8%B5%9B/65674721?fr=api_baidu_opex_festival",
+        "new_url": "https://baike.baidu.com/item/%E6%B1%9F%E8%8B%8F%E7%9C%81%E5%9F%8E%E5%B8%82%E8%B6%B3%E7%90%83%E8%81%94%E8%B5%9B/65674721?fr=api_baidu_opex_festival#"
+      },
+      "page_url": "https://baike.baidu.com/item/%E6%B1%9F%E8%8B%8F%E7%9C%81%E5%9F%8E%E5%B8%82%E8%B6%B3%E7%90%83%E8%81%94%E8%B5%9B/65674721?fr=api_baidu_opex_festival#",
+      "page_title": "江苏省城市足球联赛_百度百科",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_11_1748495124.png",
+      "description": "窗口导航: https://baike.baidu.com/item/%E6%B1%9F%E8%8B%8F%E7%9C%81%E5%9F%8E%E5%B8%82%E8%B6%B3%E7%90%83%E8%81%94%E8%B5%9B/65674721?fr=api_baidu_opex_festival -> https://baike.baidu.com/item/%E6%B1%9F%E8%8B%8F%E7%9C%81%E5%9F%8E%E5%B8%82%E8%B6%B3%E7%90%83%E8%81%94%E8%B5%9B/65674721?fr=api_baidu_opex_festival#",
+      "expected_result": ""
+    },
+    {
+      "id": "992a507d-44fe-4a51-b0fd-4e9ba428752b",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 13:05:36.698134",
+      "element_info": {
+        "type": "window",
+        "window_id": "fa102ab0-ddbd-4874-b26d-4346963b247a",
+        "parent_id": "6dff4725-6bcb-4e7a-b701-a6b76568b805",
+        "is_popup": true
+      },
+      "page_url": "https://baike.baidu.com/campus",
+      "page_title": "百科校园官网首页",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_12_1748495136.png",
+      "description": "新窗口创建: 百科校园官网首页",
+      "expected_result": ""
+    },
+    {
+      "id": "74e8e907-96cf-4c4b-98c2-7a9d8aecd7d0",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:24:58.784574",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "fa102ab0-ddbd-4874-b26d-4346963b247a",
+        "old_url": "https://baike.baidu.com/campus",
+        "new_url": "chrome-error://chromewebdata/"
+      },
+      "page_url": "chrome-error://chromewebdata/",
+      "page_title": "192.168.1.128",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_13_1748496298.png",
+      "description": "窗口导航: https://baike.baidu.com/campus -> chrome-error://chromewebdata/",
+      "expected_result": ""
+    },
+    {
+      "id": "4a70b56a-fb16-446f-a84c-86ccc036ca29",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:25:15.891190",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "fa102ab0-ddbd-4874-b26d-4346963b247a",
+        "old_url": "chrome-error://chromewebdata/",
+        "new_url": "https://playwright.dev/"
+      },
+      "page_url": "https://playwright.dev/",
+      "page_title": "Fast and reliable end-to-end testing for modern web apps | Playwright",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_14_1748496315.png",
+      "description": "窗口导航: chrome-error://chromewebdata/ -> https://playwright.dev/",
+      "expected_result": ""
+    },
+    {
+      "id": "e918da86-92ac-4b4e-a726-3adc47dc4220",
+      "session_id": "4057f8ed-1a0d-442f-b5dd-12d0b47db353",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:25:29.767185",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "fa102ab0-ddbd-4874-b26d-4346963b247a",
+        "old_url": "https://playwright.dev/",
+        "new_url": "https://playwright.dev/docs/intro"
+      },
+      "page_url": "https://playwright.dev/docs/intro",
+      "page_title": "Installation | Playwright",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_15_1748496329.png",
+      "description": "窗口导航: https://playwright.dev/ -> https://playwright.dev/docs/intro",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

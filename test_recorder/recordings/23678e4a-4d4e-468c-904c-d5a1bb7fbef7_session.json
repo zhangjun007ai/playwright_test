@@ -1,0 +1,29 @@
+{
+  "id": "23678e4a-4d4e-468c-904c-d5a1bb7fbef7",
+  "name": "功能",
+  "description": "",
+  "start_time": "2025-05-28 12:57:47.172378",
+  "end_time": "2025-05-28 12:58:07.808812",
+  "actions": [
+    {
+      "id": "3c8336d8-b1c5-46c0-a6d0-8462adc2bfb3",
+      "session_id": "23678e4a-4d4e-468c-904c-d5a1bb7fbef7",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 12:57:47.186332",
+      "element_info": {},
+      "page_url": "http://192.168.1.128/login",
+      "page_title": "",
+      "page_text": "",
+      "additional_data": "{\"url\": \"http://192.168.1.128/login\"}",
+      "screenshot_path": "",
+      "description": "",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

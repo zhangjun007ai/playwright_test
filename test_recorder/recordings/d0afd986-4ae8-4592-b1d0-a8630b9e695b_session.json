@@ -1,0 +1,14 @@
+{
+  "id": "d0afd986-4ae8-4592-b1d0-a8630b9e695b",
+  "name": "功能",
+  "description": "",
+  "start_time": "2025-05-28 12:27:37.422102",
+  "end_time": "2025-05-28 12:28:07.664336",
+  "actions": [],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "recording",
+  "tags": []
+}

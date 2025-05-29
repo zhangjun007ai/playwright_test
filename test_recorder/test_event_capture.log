@@ -1,0 +1,27 @@
+2025-05-28 20:55:27.241 | INFO     | __main__:test_event_capture_workflow:28 - 开始测试事件捕获功能...
+2025-05-28 20:55:27.268 | INFO     | __main__:monitor_websocket_messages:100 - WebSocket监听器已启动
+2025-05-28 20:55:28.251 | INFO     | __main__:test_event_capture_workflow:38 - 开始录制...
+2025-05-28 20:55:28.276 | SUCCESS  | __main__:test_event_capture_workflow:49 - 录制开始成功，会话ID: ae354e85-7287-40ff-a8b7-783eea664c9c
+2025-05-28 20:55:30.282 | INFO     | __main__:test_event_capture_workflow:61 - 录制已开始，现在请进行以下测试：
+2025-05-28 20:55:30.282 | INFO     | __main__:test_event_capture_workflow:62 - 1. 在浏览器中访问测试页面: http://localhost:8000/static/test_page.html
+2025-05-28 20:55:30.283 | INFO     | __main__:test_event_capture_workflow:63 - 2. 点击页面上的各种按钮和链接
+2025-05-28 20:55:30.284 | INFO     | __main__:test_event_capture_workflow:64 - 3. 在输入框中输入文本
+2025-05-28 20:55:30.284 | INFO     | __main__:test_event_capture_workflow:65 - 4. 选择下拉框中的选项
+2025-05-28 20:55:30.284 | INFO     | __main__:test_event_capture_workflow:66 - 5. 等待30秒进行测试...
+2025-05-28 20:55:30.792 | INFO     | __main__:monitor_websocket_messages:113 - 捕获到事件: goto - 打开网页: about:blank...
+2025-05-28 20:55:30.902 | INFO     | __main__:monitor_websocket_messages:113 - 捕获到事件: goto - 打开网页: about:blank...
+2025-05-28 20:56:00.568 | INFO     | __main__:test_event_capture_workflow:76 - 停止录制...
+2025-05-28 20:56:01.058 | SUCCESS  | __main__:test_event_capture_workflow:82 - 录制停止成功
+2025-05-28 20:56:01.058 | INFO     | __main__:analyze_captured_events:127 - 分析捕获到的事件，总消息数: 2
+2025-05-28 20:56:01.059 | INFO     | __main__:analyze_captured_events:140 - 消息类型统计:
+2025-05-28 20:56:01.059 | INFO     | __main__:analyze_captured_events:142 -   action_recorded: 2 条
+2025-05-28 20:56:01.059 | SUCCESS  | __main__:analyze_captured_events:146 - 成功捕获 2 个用户操作事件
+2025-05-28 20:56:01.060 | INFO     | __main__:analyze_captured_events:155 - 操作类型统计:
+2025-05-28 20:56:01.060 | INFO     | __main__:analyze_captured_events:157 -   goto: 2 次
+2025-05-28 20:56:01.061 | INFO     | __main__:analyze_captured_events:160 - 前5个事件详细信息:
+2025-05-28 20:56:01.061 | INFO     | __main__:analyze_captured_events:163 -   1. goto - 打开网页: about:blank
+2025-05-28 20:56:01.062 | INFO     | __main__:analyze_captured_events:163 -   2. goto - 打开网页: about:blank
+2025-05-28 20:56:01.063 | WARNING  | __main__:analyze_captured_events:176 - ❌ 没有捕获到用户交互事件，只有页面导航事件
+2025-05-28 20:56:01.064 | WARNING  | __main__:analyze_captured_events:177 - ❌ 可能JavaScript事件监听器没有正常工作
+2025-05-28 20:56:01.064 | ERROR    | __main__:main:220 - 💥 事件捕获功能测试失败！
+2025-05-28 20:56:01.066 | INFO     | __main__:monitor_websocket_messages:119 - WebSocket监听任务已取消

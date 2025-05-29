@@ -1,0 +1,66 @@
+{
+  "id": "f88b1a88-f557-4fb2-a4ed-7038ed9bdf36",
+  "name": "给goon给你",
+  "description": "",
+  "start_time": "2025-05-28 23:13:27.985251",
+  "end_time": "2025-05-28 23:13:55.014381",
+  "actions": [
+    {
+      "id": "19c2ab5e-3fe1-4d1d-abea-21de04bbcc17",
+      "session_id": "f88b1a88-f557-4fb2-a4ed-7038ed9bdf36",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 23:13:29.181271",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "导航到: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748445209.png",
+      "description": "页面导航到: about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "853f21a6-2ad6-4b6b-b950-847552c306ac",
+      "session_id": "f88b1a88-f557-4fb2-a4ed-7038ed9bdf36",
+      "action_type": "load",
+      "timestamp": "2025-05-28 23:13:29.228403",
+      "element_info": {
+        "type": "load",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "页面加载完成: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748445209.png",
+      "description": "页面 about:blank 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "62ee3c93-6427-4765-a5e2-b3b309f834ee",
+      "session_id": "f88b1a88-f557-4fb2-a4ed-7038ed9bdf36",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 23:13:29.275470",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "浏览器已启动",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748445209.png",
+      "description": "录制开始，浏览器已准备就绪",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

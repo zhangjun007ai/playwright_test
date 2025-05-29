@@ -1,0 +1,215 @@
+{
+  "id": "4ec74a2e-ff1c-422e-9152-5d770bf21fb7",
+  "name": "给goon给你",
+  "description": "",
+  "start_time": "2025-05-28 22:38:06.967222",
+  "end_time": "2025-05-28 22:39:05.749872",
+  "actions": [
+    {
+      "id": "35deb181-7ac7-404b-83ed-66339b8c4627",
+      "session_id": "4ec74a2e-ff1c-422e-9152-5d770bf21fb7",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 22:38:08.173461",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "导航到: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748443088.png",
+      "description": "页面导航到: about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "aac93fde-a3f5-4174-a11f-c164614abd81",
+      "session_id": "4ec74a2e-ff1c-422e-9152-5d770bf21fb7",
+      "action_type": "load",
+      "timestamp": "2025-05-28 22:38:08.211976",
+      "element_info": {
+        "type": "load",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "页面加载完成: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748443088.png",
+      "description": "页面 about:blank 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "a463c6aa-2875-47e5-8db7-f65cc81361cf",
+      "session_id": "4ec74a2e-ff1c-422e-9152-5d770bf21fb7",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 22:38:08.252533",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "浏览器已启动",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748443088.png",
+      "description": "录制开始，浏览器已准备就绪",
+      "expected_result": ""
+    },
+    {
+      "id": "f8ec9413-d2d5-4e4b-8674-92b1e2fc6080",
+      "session_id": "4ec74a2e-ff1c-422e-9152-5d770bf21fb7",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 22:38:20.473659",
+      "element_info": {
+        "type": "navigation",
+        "url": "http://192.168.1.128/login"
+      },
+      "page_url": "http://192.168.1.128/login",
+      "page_title": "导航到: http://192.168.1.128/login",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_4_1748443100.png",
+      "description": "页面导航到: http://192.168.1.128/login",
+      "expected_result": ""
+    },
+    {
+      "id": "fb38dcf9-9d67-4f3e-93da-b6b7257f0fe3",
+      "session_id": "4ec74a2e-ff1c-422e-9152-5d770bf21fb7",
+      "action_type": "load",
+      "timestamp": "2025-05-28 22:38:20.530518",
+      "element_info": {
+        "type": "load",
+        "url": "http://192.168.1.128/login"
+      },
+      "page_url": "http://192.168.1.128/login",
+      "page_title": "页面加载完成: http://192.168.1.128/login",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_4_1748443100.png",
+      "description": "页面 http://192.168.1.128/login 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "af780ece-3e0f-4798-983a-fe0d719b647b",
+      "session_id": "4ec74a2e-ff1c-422e-9152-5d770bf21fb7",
+      "action_type": "click",
+      "timestamp": "2025-05-28 22:38:23.939596",
+      "element_info": {
+        "tagName": "BUTTON",
+        "id": "btnSubmit",
+        "className": "btn btn-success btn-block",
+        "text": "登录",
+        "selector": "#btnSubmit",
+        "type": "submit",
+        "placeholder": "",
+        "href": "",
+        "value": "",
+        "role": "",
+        "ariaLabel": "",
+        "title": ""
+      },
+      "page_url": "http://192.168.1.128/login",
+      "page_title": "点击: '登录'",
+      "page_text": "",
+      "additional_data": "{\"type\": \"click\", \"element\": {\"tagName\": \"BUTTON\", \"id\": \"btnSubmit\", \"className\": \"btn btn-success btn-block\", \"text\": \"\\u767b\\u5f55\", \"selector\": \"#btnSubmit\", \"type\": \"submit\", \"placeholder\": \"\", \"href\": \"\", \"value\": \"\", \"role\": \"\", \"ariaLabel\": \"\", \"title\": \"\"}, \"timestamp\": 1748443103619, \"url\": \"http://192.168.1.128/login\", \"title\": \"\\u767b\\u5f55\\u7cfb\\u7edf\"}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748443103.png",
+      "description": "点击了 button: '登录'",
+      "expected_result": ""
+    },
+    {
+      "id": "7a4884f4-1c74-4d3f-a3b8-6e82be3fb190",
+      "session_id": "4ec74a2e-ff1c-422e-9152-5d770bf21fb7",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 22:38:24.028044",
+      "element_info": {
+        "type": "navigation",
+        "url": "http://192.168.1.128/index"
+      },
+      "page_url": "http://192.168.1.128/index",
+      "page_title": "导航到: http://192.168.1.128/index",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748443103.png",
+      "description": "页面导航到: http://192.168.1.128/index",
+      "expected_result": ""
+    },
+    {
+      "id": "2c082225-363c-4151-92cd-f61602e04282",
+      "session_id": "4ec74a2e-ff1c-422e-9152-5d770bf21fb7",
+      "action_type": "load",
+      "timestamp": "2025-05-28 22:38:24.099166",
+      "element_info": {
+        "type": "load",
+        "url": "http://192.168.1.128/index"
+      },
+      "page_url": "http://192.168.1.128/index",
+      "page_title": "页面加载完成: http://192.168.1.128/index",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748443103.png",
+      "description": "页面 http://192.168.1.128/index 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "f4416c67-80da-4f96-a76b-865ed1589581",
+      "session_id": "4ec74a2e-ff1c-422e-9152-5d770bf21fb7",
+      "action_type": "click",
+      "timestamp": "2025-05-28 22:38:28.167870",
+      "element_info": {
+        "tagName": "SPAN",
+        "id": "",
+        "className": "nav-label",
+        "text": "系统管理",
+        "selector": ".nav-label",
+        "type": "",
+        "placeholder": "",
+        "href": "",
+        "value": "",
+        "role": "",
+        "ariaLabel": "",
+        "title": ""
+      },
+      "page_url": "http://192.168.1.128/index",
+      "page_title": "点击: '系统管理'",
+      "page_text": "",
+      "additional_data": "{\"type\": \"click\", \"element\": {\"tagName\": \"SPAN\", \"id\": \"\", \"className\": \"nav-label\", \"text\": \"\\u7cfb\\u7edf\\u7ba1\\u7406\", \"selector\": \".nav-label\", \"type\": \"\", \"placeholder\": \"\", \"href\": \"\", \"value\": \"\", \"role\": \"\", \"ariaLabel\": \"\", \"title\": \"\"}, \"timestamp\": 1748443108095, \"url\": \"http://192.168.1.128/index\", \"title\": \"\\u7cfb\\u7edf\\u9996\\u9875\"}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_9_1748443108.png",
+      "description": "点击了 navigation: '系统管理'",
+      "expected_result": ""
+    },
+    {
+      "id": "19f3fce7-1628-4ccb-992f-77272ad6702a",
+      "session_id": "4ec74a2e-ff1c-422e-9152-5d770bf21fb7",
+      "action_type": "click",
+      "timestamp": "2025-05-28 22:38:30.519080",
+      "element_info": {
+        "tagName": "A",
+        "id": "",
+        "className": "menuItem",
+        "text": "用户管理",
+        "selector": ".menuItem",
+        "type": "",
+        "placeholder": "",
+        "href": "http://192.168.1.128/system/user",
+        "value": "",
+        "role": "",
+        "ariaLabel": "",
+        "title": ""
+      },
+      "page_url": "http://192.168.1.128/index",
+      "page_title": "点击: '用户管理'",
+      "page_text": "",
+      "additional_data": "{\"type\": \"click\", \"element\": {\"tagName\": \"A\", \"id\": \"\", \"className\": \"menuItem\", \"text\": \"\\u7528\\u6237\\u7ba1\\u7406\", \"selector\": \".menuItem\", \"type\": \"\", \"placeholder\": \"\", \"href\": \"http://192.168.1.128/system/user\", \"value\": \"\", \"role\": \"\", \"ariaLabel\": \"\", \"title\": \"\"}, \"timestamp\": 1748443110204, \"url\": \"http://192.168.1.128/index\", \"title\": \"\\u7cfb\\u7edf\\u9996\\u9875\"}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_10_1748443110.png",
+      "description": "点击了 link: '用户管理'",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

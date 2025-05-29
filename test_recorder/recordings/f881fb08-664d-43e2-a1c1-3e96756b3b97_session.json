@@ -1,0 +1,195 @@
+{
+  "id": "f881fb08-664d-43e2-a1c1-3e96756b3b97",
+  "name": "给goon给你",
+  "description": "",
+  "start_time": "2025-05-29 12:57:17.921056",
+  "end_time": "2025-05-29 12:59:50.157083",
+  "actions": [
+    {
+      "id": "e2d44cce-d264-4646-9657-64d07070bfb1",
+      "session_id": "f881fb08-664d-43e2-a1c1-3e96756b3b97",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 12:57:19.233756",
+      "element_info": {
+        "type": "window",
+        "window_id": "ff188e0c-6dd6-4ac7-8651-d60e412876c6",
+        "parent_id": null,
+        "is_popup": false
+      },
+      "page_url": "about:blank",
+      "page_title": "",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748494639.png",
+      "description": "新窗口创建: about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "370df805-65a7-4a51-826d-1664497b68e1",
+      "session_id": "f881fb08-664d-43e2-a1c1-3e96756b3b97",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 12:57:19.325952",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "导航到: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748494639.png",
+      "description": "页面导航到: about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "e5bc08fe-526e-435d-8d8d-73e436e0a9eb",
+      "session_id": "f881fb08-664d-43e2-a1c1-3e96756b3b97",
+      "action_type": "load",
+      "timestamp": "2025-05-29 12:57:19.377949",
+      "element_info": {
+        "type": "load",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "页面加载完成: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748494639.png",
+      "description": "页面 about:blank 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "df5f55df-ecdd-4138-8e8b-567e757fa288",
+      "session_id": "f881fb08-664d-43e2-a1c1-3e96756b3b97",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 12:57:19.418468",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "浏览器已启动",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748494639.png",
+      "description": "录制开始，浏览器已准备就绪",
+      "expected_result": ""
+    },
+    {
+      "id": "3f63f5c5-35e1-4e88-a14a-5e821624bf6b",
+      "session_id": "f881fb08-664d-43e2-a1c1-3e96756b3b97",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 12:57:19.456470",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "ff188e0c-6dd6-4ac7-8651-d60e412876c6",
+        "old_url": "about:blank",
+        "new_url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748494639.png",
+      "description": "窗口导航: about:blank -> about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "e9e349a9-ca8e-412f-979e-ddda138aee54",
+      "session_id": "f881fb08-664d-43e2-a1c1-3e96756b3b97",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 12:57:27.663212",
+      "element_info": {
+        "type": "navigation",
+        "url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "导航到: https://www.baidu.com/",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748494647.png",
+      "description": "页面导航到: https://www.baidu.com/",
+      "expected_result": ""
+    },
+    {
+      "id": "aad8041f-c8ba-4bfb-97b8-85ba36369237",
+      "session_id": "f881fb08-664d-43e2-a1c1-3e96756b3b97",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 12:57:27.728069",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "ff188e0c-6dd6-4ac7-8651-d60e412876c6",
+        "old_url": "about:blank",
+        "new_url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "百度一下，你就知道",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748494647.png",
+      "description": "窗口导航: about:blank -> https://www.baidu.com/",
+      "expected_result": ""
+    },
+    {
+      "id": "e06abd2b-9ba1-421c-8f21-2fb1f8ad0542",
+      "session_id": "f881fb08-664d-43e2-a1c1-3e96756b3b97",
+      "action_type": "load",
+      "timestamp": "2025-05-29 12:57:27.993920",
+      "element_info": {
+        "type": "load",
+        "url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "页面加载完成: https://www.baidu.com/",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_8_1748494647.png",
+      "description": "页面 https://www.baidu.com/ 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "94b30ccf-ffa8-4af1-8b60-ddb90dd40ee9",
+      "session_id": "f881fb08-664d-43e2-a1c1-3e96756b3b97",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 12:57:30.352558",
+      "element_info": {
+        "type": "window",
+        "window_id": "f208ff54-b8ef-4293-8c6a-8803a8d9fbf1",
+        "parent_id": "ff188e0c-6dd6-4ac7-8651-d60e412876c6",
+        "is_popup": true
+      },
+      "page_url": "https://www.baidu.com/s?wd=%E6%80%BB%E4%B9%A6%E8%AE%B0%E6%B7%B1%E6%83%85%E5%AF%84%E6%9C%9B%E2%80%9C%E5%B0%8F%E6%A0%91%E8%8B%97%E2%80%9D&sa=fyb_n_homepage&rsv_dl=fyb_n_homepage&from=super&cl=3&tn=baidutop10&fr=top1000&rsv_idx=2&hisfilter=1",
+      "page_title": "总书记深情寄望“小树苗”_百度搜索",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_9_1748494650.png",
+      "description": "新窗口创建: 总书记深情寄望“小树苗”_百度搜索",
+      "expected_result": ""
+    },
+    {
+      "id": "4b8e657d-ae15-440d-9496-47ee81354abc",
+      "session_id": "f881fb08-664d-43e2-a1c1-3e96756b3b97",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 12:57:36.982620",
+      "element_info": {
+        "type": "window",
+        "window_id": "fa839dfe-0e1b-4f1c-9519-5c7b337278c7",
+        "parent_id": "f208ff54-b8ef-4293-8c6a-8803a8d9fbf1",
+        "is_popup": true
+      },
+      "page_url": "https://baijiahao.baidu.com/s?id=1833404317215414798",
+      "page_title": "时政微观察丨总书记深情寄望“小树苗”",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_10_1748494656.png",
+      "description": "新窗口创建: 时政微观察丨总书记深情寄望“小树苗”",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

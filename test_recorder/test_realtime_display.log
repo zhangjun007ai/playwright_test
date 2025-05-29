@@ -1,0 +1,29 @@
+2025-05-28 20:47:47.823 | INFO     | __main__:run_all_tests:183 - 开始运行实时显示功能测试...
+2025-05-28 20:47:47.824 | INFO     | __main__:test_api_status:166 - 测试API状态...
+2025-05-28 20:47:47.834 | SUCCESS  | __main__:test_api_status:172 - API状态正常: {'recording': False, 'session_id': None, 'browser_initialized': True, 'action_count': 0}
+2025-05-28 20:47:47.835 | INFO     | __main__:test_websocket_connection:26 - 开始测试WebSocket连接...
+2025-05-28 20:47:47.860 | INFO     | __main__:test_websocket_connection:30 - WebSocket连接成功建立
+2025-05-28 20:47:47.860 | INFO     | __main__:test_websocket_connection:34 - 已发送心跳消息
+2025-05-28 20:47:47.860 | INFO     | __main__:test_websocket_connection:39 - 收到响应: {'type': 'pong'}
+2025-05-28 20:47:47.861 | SUCCESS  | __main__:test_websocket_connection:42 - 心跳测试成功
+2025-05-28 20:47:47.861 | INFO     | __main__:test_recording_workflow:54 - 开始测试录制工作流程...
+2025-05-28 20:47:47.866 | INFO     | __main__:monitor_websocket_messages:114 - WebSocket监听器已启动
+2025-05-28 20:47:48.872 | INFO     | __main__:test_recording_workflow:64 - 发送开始录制请求...
+2025-05-28 20:47:48.896 | SUCCESS  | __main__:test_recording_workflow:74 - 录制开始成功，会话ID: bc1cc353-643d-4eee-8bb3-54f5730b66a4
+2025-05-28 20:47:48.897 | INFO     | __main__:test_recording_workflow:84 - 等待接收WebSocket消息...
+2025-05-28 20:47:51.468 | INFO     | __main__:monitor_websocket_messages:124 - 收到WebSocket消息: action_recorded
+2025-05-28 20:47:51.575 | INFO     | __main__:monitor_websocket_messages:124 - 收到WebSocket消息: action_recorded
+2025-05-28 20:47:51.914 | INFO     | __main__:test_recording_workflow:88 - 发送停止录制请求...
+2025-05-28 20:47:52.927 | SUCCESS  | __main__:test_recording_workflow:94 - 录制停止成功
+2025-05-28 20:47:52.927 | INFO     | __main__:analyze_received_messages:137 - 共接收到 2 条消息
+2025-05-28 20:47:52.927 | INFO     | __main__:analyze_received_messages:144 - 消息类型统计:
+2025-05-28 20:47:52.928 | INFO     | __main__:analyze_received_messages:146 -   action_recorded: 2 条
+2025-05-28 20:47:52.928 | SUCCESS  | __main__:analyze_received_messages:153 - 检测到 2 条操作记录消息
+2025-05-28 20:47:52.928 | INFO     | __main__:analyze_received_messages:156 -   操作 1: goto - 打开网页: about:blank
+2025-05-28 20:47:52.929 | INFO     | __main__:analyze_received_messages:156 -   操作 2: goto - 打开网页: about:blank
+2025-05-28 20:47:52.929 | INFO     | __main__:run_all_tests:197 - 测试结果汇总:
+2025-05-28 20:47:52.929 | INFO     | __main__:run_all_tests:200 -   api_status: ✅ 通过
+2025-05-28 20:47:52.930 | INFO     | __main__:run_all_tests:200 -   websocket_connection: ✅ 通过
+2025-05-28 20:47:52.930 | INFO     | __main__:run_all_tests:200 -   recording_workflow: ✅ 通过
+2025-05-28 20:47:52.931 | SUCCESS  | __main__:run_all_tests:204 - 所有测试通过！实时显示功能正常
+2025-05-28 20:47:52.931 | INFO     | __main__:monitor_websocket_messages:129 - WebSocket监听任务已取消

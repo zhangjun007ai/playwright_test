@@ -1,0 +1,30 @@
+{
+  "id": "TC_b479c567",
+  "name": "功能",
+  "description": "UI界面操作功能测试",
+  "priority": "中",
+  "category": "功能测试",
+  "module": "主要功能模块",
+  "preconditions": [
+    "浏览器已打开并可访问：about:blank"
+  ],
+  "test_steps": [
+    {
+      "step_number": 1,
+      "action": "goto",
+      "description": "访问页面：about:blank",
+      "expected_result": "成功访问页面，页面标题显示为：",
+      "actual_result": "",
+      "screenshot_path": "",
+      "status": "待执行"
+    }
+  ],
+  "expected_results": [],
+  "screenshots": [],
+  "trace_file": "",
+  "created_time": "2025-05-28 12:56:16.184019",
+  "updated_time": null,
+  "created_by": "AI自动生成",
+  "execution_time": 35.24029,
+  "execution_status": "未执行"
+}

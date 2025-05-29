@@ -1,0 +1,127 @@
+{
+  "id": "3893ad7c-3d76-4375-97fd-bef017832621",
+  "name": "给goon给你",
+  "description": "",
+  "start_time": "2025-05-29 09:57:31.427309",
+  "end_time": "2025-05-29 12:24:11.127021",
+  "actions": [
+    {
+      "id": "bce12f64-4e09-4f0d-93d1-95243bc4d33c",
+      "session_id": "3893ad7c-3d76-4375-97fd-bef017832621",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 09:57:32.480558",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "导航到: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748483852.png",
+      "description": "页面导航到: about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "18cd8e21-fa1d-403a-9604-3fbda8d8bd81",
+      "session_id": "3893ad7c-3d76-4375-97fd-bef017832621",
+      "action_type": "load",
+      "timestamp": "2025-05-29 09:57:32.526161",
+      "element_info": {
+        "type": "load",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "页面加载完成: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748483852.png",
+      "description": "页面 about:blank 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "3b5dca30-a25d-433d-ab4d-7f288486f592",
+      "session_id": "3893ad7c-3d76-4375-97fd-bef017832621",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 09:57:32.569677",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "浏览器已启动",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748483852.png",
+      "description": "录制开始，浏览器已准备就绪",
+      "expected_result": ""
+    },
+    {
+      "id": "876f0cb9-e29f-4361-b852-01923dde68c4",
+      "session_id": "3893ad7c-3d76-4375-97fd-bef017832621",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 09:57:43.674417",
+      "element_info": {
+        "type": "navigation",
+        "url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "导航到: https://www.baidu.com/",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_4_1748483862.png",
+      "description": "页面导航到: https://www.baidu.com/",
+      "expected_result": ""
+    },
+    {
+      "id": "f52f0cc7-92cf-4825-8767-5494ee85a27b",
+      "session_id": "3893ad7c-3d76-4375-97fd-bef017832621",
+      "action_type": "load",
+      "timestamp": "2025-05-29 09:57:43.803368",
+      "element_info": {
+        "type": "load",
+        "url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "页面加载完成: https://www.baidu.com/",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_4_1748483863.png",
+      "description": "页面 https://www.baidu.com/ 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "b2727fd7-7960-4d6a-9da7-23592c772055",
+      "session_id": "3893ad7c-3d76-4375-97fd-bef017832621",
+      "action_type": "click",
+      "timestamp": "2025-05-29 09:57:49.247199",
+      "element_info": {
+        "tagName": "SPAN",
+        "id": "",
+        "className": "title-content-title",
+        "text": "筑牢强国建设 民族复兴的文化根基",
+        "selector": ".title-content-title",
+        "type": "",
+        "placeholder": "",
+        "href": "",
+        "value": "",
+        "role": "",
+        "ariaLabel": "",
+        "title": ""
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "点击: '筑牢强国建设 民族复兴的文化根基'",
+      "page_text": "",
+      "additional_data": "{\"type\": \"click\", \"element\": {\"tagName\": \"SPAN\", \"id\": \"\", \"className\": \"title-content-title\", \"text\": \"\\u7b51\\u7262\\u5f3a\\u56fd\\u5efa\\u8bbe \\u6c11\\u65cf\\u590d\\u5174\\u7684\\u6587\\u5316\\u6839\\u57fa\", \"selector\": \".title-content-title\", \"type\": \"\", \"placeholder\": \"\", \"href\": \"\", \"value\": \"\", \"role\": \"\", \"ariaLabel\": \"\", \"title\": \"\"}, \"timestamp\": 1748483869105, \"url\": \"https://www.baidu.com/\", \"title\": \"\\u767e\\u5ea6\\u4e00\\u4e0b\\uff0c\\u4f60\\u5c31\\u77e5\\u9053\"}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748483869.png",
+      "description": "点击了 None: '筑牢强国建设 民族复兴的文化根基'",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

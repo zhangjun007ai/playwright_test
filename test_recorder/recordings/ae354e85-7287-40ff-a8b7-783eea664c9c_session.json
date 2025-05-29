@@ -1,0 +1,32 @@
+{
+  "id": "ae354e85-7287-40ff-a8b7-783eea664c9c",
+  "name": "事件捕获测试",
+  "description": "测试JavaScript事件监听器是否正常工作",
+  "start_time": "2025-05-28 20:55:28.255222",
+  "end_time": "2025-05-28 20:56:01.054338",
+  "actions": [
+    {
+      "id": "07096786-1456-4920-b3f1-5a77de5cde1b",
+      "session_id": "ae354e85-7287-40ff-a8b7-783eea664c9c",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 20:55:30.777806",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "导航到: about:blank",
+      "page_text": "",
+      "additional_data": "{\"url\": \"about:blank\", \"action\": \"navigate\"}",
+      "screenshot_path": "",
+      "description": "打开网页: about:blank",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

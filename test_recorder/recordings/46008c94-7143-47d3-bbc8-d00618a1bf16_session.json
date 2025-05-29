@@ -1,0 +1,49 @@
+{
+  "id": "46008c94-7143-47d3-bbc8-d00618a1bf16",
+  "name": "实时录制测试",
+  "description": "测试直接获取Playwright操作数据的功能",
+  "start_time": "2025-05-28 13:26:46.332408",
+  "end_time": "2025-05-28 20:36:14.770517",
+  "actions": [
+    {
+      "id": "d89165a2-1ff8-417f-a6bc-4c1541b62de2",
+      "session_id": "46008c94-7143-47d3-bbc8-d00618a1bf16",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 13:26:49.348889",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "导航到: about:blank",
+      "page_text": "",
+      "additional_data": "{\"url\": \"about:blank\", \"action\": \"navigate\"}",
+      "screenshot_path": "",
+      "description": "打开网页: about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "671de898-e2cd-42e3-a795-19963fc02c5c",
+      "session_id": "46008c94-7143-47d3-bbc8-d00618a1bf16",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 20:32:09.458979",
+      "element_info": {
+        "type": "navigation",
+        "url": "http://192.168.1.128/login"
+      },
+      "page_url": "http://192.168.1.128/login",
+      "page_title": "导航到: http://192.168.1.128/login",
+      "page_text": "",
+      "additional_data": "{\"url\": \"http://192.168.1.128/login\", \"action\": \"navigate\"}",
+      "screenshot_path": "",
+      "description": "打开网页: http://192.168.1.128/login",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

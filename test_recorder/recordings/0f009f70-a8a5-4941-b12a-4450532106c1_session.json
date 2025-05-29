@@ -1,0 +1,214 @@
+{
+  "id": "0f009f70-a8a5-4941-b12a-4450532106c1",
+  "name": "给goon给你",
+  "description": "",
+  "start_time": "2025-05-29 13:29:47.342636",
+  "end_time": "2025-05-29 13:32:11.396306",
+  "actions": [
+    {
+      "id": "26704a61-8143-4dcd-add1-cb16accaa485",
+      "session_id": "0f009f70-a8a5-4941-b12a-4450532106c1",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 13:29:48.614369",
+      "element_info": {
+        "type": "window",
+        "window_id": "6f466dc4-7bac-42a9-adc5-fb24d15dafa7",
+        "parent_id": null,
+        "is_popup": false
+      },
+      "page_url": "about:blank",
+      "page_title": "",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_1_1748496588.png",
+      "description": "新窗口创建: about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "eb9cb38a-442a-4ab9-8eec-2344ee3433d3",
+      "session_id": "0f009f70-a8a5-4941-b12a-4450532106c1",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:29:48.703443",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "导航到: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748496588.png",
+      "description": "页面导航到: about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "a93e0b99-133e-43f8-96b4-7761fe9dca7a",
+      "session_id": "0f009f70-a8a5-4941-b12a-4450532106c1",
+      "action_type": "load",
+      "timestamp": "2025-05-29 13:29:48.745875",
+      "element_info": {
+        "type": "load",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "页面加载完成: about:blank",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748496588.png",
+      "description": "页面 about:blank 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "b85755d0-9667-4da4-a295-fb65e4518617",
+      "session_id": "0f009f70-a8a5-4941-b12a-4450532106c1",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:29:48.791228",
+      "element_info": {
+        "type": "navigation",
+        "url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "浏览器已启动",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748496588.png",
+      "description": "录制开始，浏览器已准备就绪",
+      "expected_result": ""
+    },
+    {
+      "id": "ce820029-08ad-4872-80bc-b76421fb9063",
+      "session_id": "0f009f70-a8a5-4941-b12a-4450532106c1",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:29:48.831832",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "6f466dc4-7bac-42a9-adc5-fb24d15dafa7",
+        "old_url": "about:blank",
+        "new_url": "about:blank"
+      },
+      "page_url": "about:blank",
+      "page_title": "",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_2_1748496588.png",
+      "description": "窗口导航: about:blank -> about:blank",
+      "expected_result": ""
+    },
+    {
+      "id": "1577c127-615d-4402-8bea-5443f2f3f33d",
+      "session_id": "0f009f70-a8a5-4941-b12a-4450532106c1",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:29:58.290218",
+      "element_info": {
+        "type": "navigation",
+        "url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "导航到: https://www.baidu.com/",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748496597.png",
+      "description": "页面导航到: https://www.baidu.com/",
+      "expected_result": ""
+    },
+    {
+      "id": "f58e0f76-616f-4514-bab7-c72782dee430",
+      "session_id": "0f009f70-a8a5-4941-b12a-4450532106c1",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:29:58.403093",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "6f466dc4-7bac-42a9-adc5-fb24d15dafa7",
+        "old_url": "about:blank",
+        "new_url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "百度一下，你就知道",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748496597.png",
+      "description": "窗口导航: about:blank -> https://www.baidu.com/",
+      "expected_result": ""
+    },
+    {
+      "id": "ef1bafca-4709-4e34-93c0-8bc7d7daeb58",
+      "session_id": "0f009f70-a8a5-4941-b12a-4450532106c1",
+      "action_type": "load",
+      "timestamp": "2025-05-29 13:29:58.466190",
+      "element_info": {
+        "type": "load",
+        "url": "https://www.baidu.com/"
+      },
+      "page_url": "https://www.baidu.com/",
+      "page_title": "页面加载完成: https://www.baidu.com/",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_6_1748496598.png",
+      "description": "页面 https://www.baidu.com/ 加载完成",
+      "expected_result": ""
+    },
+    {
+      "id": "ee9043a7-0577-4db5-97de-a2c3ea261945",
+      "session_id": "0f009f70-a8a5-4941-b12a-4450532106c1",
+      "action_type": "window_open",
+      "timestamp": "2025-05-29 13:30:02.598263",
+      "element_info": {
+        "type": "window",
+        "window_id": "3ea55cb7-6c32-4e4d-898d-ee4c78f9133c",
+        "parent_id": "6f466dc4-7bac-42a9-adc5-fb24d15dafa7",
+        "is_popup": true
+      },
+      "page_url": "https://www.baidu.com/s?wd=%E2%80%9C%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80+%E5%8F%8B%E8%B0%8A%E7%AC%AC%E5%8D%81%E5%9B%9B%E2%80%9D&sa=fyb_n_homepage&rsv_dl=fyb_n_homepage&from=super&cl=3&tn=baidutop10&fr=top1000&rsv_idx=2&hisfilter=1",
+      "page_title": "“比赛第一 友谊第十四”_百度搜索",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_9_1748496602.png",
+      "description": "新窗口创建: “比赛第一 友谊第十四”_百度搜索",
+      "expected_result": ""
+    },
+    {
+      "id": "a2926b1a-5e24-4d5b-aeee-099b34345525",
+      "session_id": "0f009f70-a8a5-4941-b12a-4450532106c1",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:30:17.420086",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "3ea55cb7-6c32-4e4d-898d-ee4c78f9133c",
+        "old_url": "https://www.baidu.com/s?wd=%E2%80%9C%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80+%E5%8F%8B%E8%B0%8A%E7%AC%AC%E5%8D%81%E5%9B%9B%E2%80%9D&sa=fyb_n_homepage&rsv_dl=fyb_n_homepage&from=super&cl=3&tn=baidutop10&fr=top1000&rsv_idx=2&hisfilter=1",
+        "new_url": "https://playwright.dev/"
+      },
+      "page_url": "https://playwright.dev/",
+      "page_title": "Fast and reliable end-to-end testing for modern web apps | Playwright",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_10_1748496617.png",
+      "description": "窗口导航: https://www.baidu.com/s?wd=%E2%80%9C%E6%AF%94%E8%B5%9B%E7%AC%AC%E4%B8%80+%E5%8F%8B%E8%B0%8A%E7%AC%AC%E5%8D%81%E5%9B%9B%E2%80%9D&sa=fyb_n_homepage&rsv_dl=fyb_n_homepage&from=super&cl=3&tn=baidutop10&fr=top1000&rsv_idx=2&hisfilter=1 -> https://playwright.dev/",
+      "expected_result": ""
+    },
+    {
+      "id": "68da3b95-5a8d-47c1-8d21-c92f7a8ed67b",
+      "session_id": "0f009f70-a8a5-4941-b12a-4450532106c1",
+      "action_type": "goto",
+      "timestamp": "2025-05-29 13:30:25.662188",
+      "element_info": {
+        "type": "navigation",
+        "window_id": "3ea55cb7-6c32-4e4d-898d-ee4c78f9133c",
+        "old_url": "https://playwright.dev/",
+        "new_url": "https://playwright.dev/docs/intro"
+      },
+      "page_url": "https://playwright.dev/docs/intro",
+      "page_title": "Installation | Playwright",
+      "page_text": "",
+      "additional_data": "{}",
+      "screenshot_path": "d:\\00testcase\\playwright-python-main\\test_recorder\\screenshots\\screenshot_11_1748496625.png",
+      "description": "窗口导航: https://playwright.dev/ -> https://playwright.dev/docs/intro",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}

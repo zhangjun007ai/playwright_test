@@ -1,0 +1,29 @@
+{
+  "id": "56f0c40e-7247-4d54-b5ca-6211cc8baa58",
+  "name": "功能",
+  "description": "",
+  "start_time": "2025-05-28 13:06:29.401477",
+  "end_time": "2025-05-28 13:07:25.367916",
+  "actions": [
+    {
+      "id": "60bebe23-f309-45c0-814f-c05345e2169a",
+      "session_id": "56f0c40e-7247-4d54-b5ca-6211cc8baa58",
+      "action_type": "goto",
+      "timestamp": "2025-05-28 13:06:31.420645",
+      "element_info": {},
+      "page_url": "about:blank",
+      "page_title": "",
+      "page_text": "",
+      "additional_data": "{\"url\": \"about:blank\"}",
+      "screenshot_path": "",
+      "description": "",
+      "expected_result": ""
+    }
+  ],
+  "test_steps": [],
+  "trace_file": "",
+  "video_file": "",
+  "browser_type": "chromium",
+  "status": "completed",
+  "tags": []
+}
