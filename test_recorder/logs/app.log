@@ -592,3 +592,22 @@
 2025-05-29 09:57:18 | INFO     | __main__:main:198 - 目录结构检查完成
 2025-05-29 09:57:18 | INFO     | __main__:main:201 - 启动Web服务器: 127.0.0.1:8000
 2025-05-29 09:57:18 | INFO     | __main__:main:202 - 调试模式: True
+2025-05-29 12:57:07 | INFO     | __main__:main:180 - 启动 测试用例自动录制生成系统 v1.0.0
+2025-05-29 12:57:07 | INFO     | __main__:main:181 - Python版本: 3.12.5 (tags/v3.12.5:ff3bc82, Aug  6 2024, 20:45:27) [MSC v.1940 64 bit (AMD64)]
+2025-05-29 12:57:07 | INFO     | __main__:main:182 - 工作目录: D:\00testcase\playwright-python-main
+2025-05-29 12:57:07 | INFO     | __main__:main:183 - 项目目录: d:\00testcase\playwright-python-main\test_recorder
+2025-05-29 12:57:07 | INFO     | __main__:check_dependencies:94 - 检查系统依赖...
+2025-05-29 12:57:07 | INFO     | __main__:check_dependencies:99 - Playwright已安装
+2025-05-29 12:57:07 | INFO     | __main__:check_dependencies:103 - FastAPI版本: 0.104.1
+2025-05-29 12:57:08 | INFO     | __main__:check_dependencies:106 - OpenPyXL版本: 3.1.2
+2025-05-29 12:57:08 | INFO     | __main__:check_dependencies:110 - Python-docx已安装
+2025-05-29 12:57:08 | INFO     | __main__:check_dependencies:114 - 所有依赖检查通过
+2025-05-29 12:57:08 | INFO     | __main__:check_playwright_browsers:125 - 检查Playwright浏览器...
+2025-05-29 12:57:08 | INFO     | __main__:check_playwright_browsers:137 - Playwright CLI可用
+2025-05-29 12:57:08 | INFO     | __main__:check_playwright_browsers:140 - 如果首次使用，请运行以下命令安装浏览器:
+2025-05-29 12:57:08 | INFO     | __main__:check_playwright_browsers:141 - playwright install chromium
+2025-05-29 12:57:08 | INFO     | __main__:check_playwright_browsers:142 - playwright install firefox
+2025-05-29 12:57:08 | INFO     | __main__:check_playwright_browsers:143 - playwright install webkit
+2025-05-29 12:57:08 | INFO     | __main__:main:198 - 目录结构检查完成
+2025-05-29 12:57:08 | INFO     | __main__:main:201 - 启动Web服务器: 127.0.0.1:8000
+2025-05-29 12:57:08 | INFO     | __main__:main:202 - 调试模式: True

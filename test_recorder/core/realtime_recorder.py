@@ -209,9 +209,214 @@ class RealtimeTestRecorder:
             const inputTimers = new Map();
             const INPUT_DELAY = 1000; // 1秒防抖延迟
             
+            // 清理标签文本
+            function cleanLabelText(text) {
+                if (!text) return '';
+                
+                // 移除前后空格
+                text = text.trim();
+                
+                // 移除前面的星号（支持各种星号字符）
+                text = text.replace(/^[*＊※●⚫︎⬤⏺⭐️★☆✱✲✳✴✵✶✷✸✹✺✻✼✽✾✿❀❁❂❃❄❅❆❇❈❉❊❋⁎⁑⁂⁕﹡]\s*/g, '');
+                
+                // 移除前面的数字序号（如：1.、1、等）
+                text = text.replace(/^[\d一二三四五六七八九十]+[.、．。:：]\s*/g, '');
+                
+                // 移除末尾的冒号和空格
+                text = text.replace(/[：:]*\s*$/g, '');
+                
+                // 如果文本被括号包围，移除括号
+                text = text.replace(/^[([{（【［｛](.+?)[)\]}）】］｝]$/g, '$1');
+                
+                // 移除常见的表单前缀词
+                const prefixes = ['请输入', '请选择', '输入', '选择', '填写'];
+                for (let prefix of prefixes) {
+                    if (text.startsWith(prefix)) {
+                        text = text.substring(prefix.length);
+                    }
+                }
+                
+                return text.trim();
+            }
+            
+            // 获取输入框关联的标签文本
+            function getInputLabel(element) {
+                let labelText = '';
+                let labels = [];
+                
+                // 方法1: 查找前面的所有文本节点和元素
+                function findPrecedingText(element) {
+                    const textsFound = [];
+                    
+                    // 获取所有前面的兄弟节点
+                    let previousNode = element.previousSibling;
+                    while (previousNode) {
+                        // 如果是文本节点
+                        if (previousNode.nodeType === 3) {
+                            const text = previousNode.textContent.trim();
+                            if (text) textsFound.unshift(text);
+                        }
+                        // 如果是元素节点
+                        else if (previousNode.nodeType === 1) {
+                            const nodeName = previousNode.nodeName.toLowerCase();
+                            // 如果是label或常见的文本容器元素
+                            if (['label', 'span', 'div', 'p', 'td', 'th'].includes(nodeName)) {
+                                const text = previousNode.innerText || previousNode.textContent;
+                                if (text.trim()) textsFound.unshift(text.trim());
+                            }
+                        }
+                        previousNode = previousNode.previousSibling;
+                    }
+                    
+                    // 如果在兄弟节点中没找到，尝试查找父元素的前面的文本
+                    if (textsFound.length === 0 && element.parentElement) {
+                        let parent = element.parentElement;
+                        let foundInParent = false;
+                        
+                        // 检查父元素的前面的兄弟节点
+                        previousNode = parent.previousSibling;
+                        while (previousNode && !foundInParent) {
+                            if (previousNode.nodeType === 3) {
+                                const text = previousNode.textContent.trim();
+                                if (text) {
+                                    textsFound.unshift(text);
+                                    foundInParent = true;
+                                }
+                            } else if (previousNode.nodeType === 1) {
+                                const text = previousNode.innerText || previousNode.textContent;
+                                if (text.trim()) {
+                                    textsFound.unshift(text.trim());
+                                    foundInParent = true;
+                                }
+                            }
+                            previousNode = previousNode.previousSibling;
+                        }
+                        
+                        // 如果还没找到，检查父元素本身是否包含文本
+                        if (!foundInParent) {
+                            // 克隆父元素以防止修改原始DOM
+                            const parentClone = parent.cloneNode(true);
+                            // 移除目标输入框及其后面的所有元素
+                            let found = false;
+                            Array.from(parentClone.children).forEach(child => {
+                                if (found || child.isEqualNode(element)) {
+                                    child.remove();
+                                    found = true;
+                                }
+                            });
+                            const text = parentClone.innerText || parentClone.textContent;
+                            if (text.trim()) textsFound.unshift(text.trim());
+                        }
+                    }
+                    
+                    return textsFound;
+                }
+                
+                // 首先尝试查找前面的文本
+                const precedingTexts = findPrecedingText(element);
+                if (precedingTexts.length > 0) {
+                    labels.push(...precedingTexts);
+                }
+                
+                // 方法2: 通过for属性关联的label
+                if (element.id) {
+                    const label = document.querySelector(`label[for="${element.id}"]`);
+                    if (label) {
+                        labels.push(label.innerText || label.textContent || '');
+                    }
+                }
+                
+                // 方法3: 父级label元素
+                const parentLabel = element.closest('label');
+                if (parentLabel) {
+                    const clone = parentLabel.cloneNode(true);
+                    const inputs = clone.querySelectorAll('input, textarea, select');
+                    inputs.forEach(input => input.remove());
+                    labels.push(clone.innerText || clone.textContent || '');
+                }
+                
+                // 方法4: 通过aria-label
+                if (element.getAttribute('aria-label')) {
+                    labels.push(element.getAttribute('aria-label'));
+                }
+                
+                // 方法5: 通过aria-labelledby
+                if (element.getAttribute('aria-labelledby')) {
+                    const labelId = element.getAttribute('aria-labelledby');
+                    const labelElement = document.getElementById(labelId);
+                    if (labelElement) {
+                        labels.push(labelElement.innerText || labelElement.textContent || '');
+                    }
+                }
+                
+                // 方法6: 查找表格中的表头
+                const td = element.closest('td');
+                if (td) {
+                    const tr = td.closest('tr');
+                    const table = td.closest('table');
+                    if (tr && table) {
+                        const cellIndex = Array.from(tr.children).indexOf(td);
+                        const headerRow = table.querySelector('tr:first-child, thead tr');
+                        if (headerRow && headerRow.children[cellIndex]) {
+                            labels.push(headerRow.children[cellIndex].innerText || headerRow.children[cellIndex].textContent || '');
+                        }
+                    }
+                }
+                
+                // 方法7: 通过placeholder作为备选
+                if (element.placeholder) {
+                    labels.push(element.placeholder);
+                }
+                
+                // 方法8: 通过name属性作为最后备选
+                if (element.name) {
+                    labels.push(element.name);
+                }
+                
+                // 处理所有找到的标签文本
+                for (let text of labels) {
+                    text = cleanLabelText(text);
+                    // 特别处理：如果清理后的文本是中文，优先使用它
+                    if (text && /[\u4e00-\u9fa5]/.test(text)) {
+                        labelText = text;
+                        break;
+                    }
+                    // 否则继续查找
+                    if (text && !labelText) {
+                        labelText = text;
+                    }
+                }
+                
+                // 如果没有找到任何标签文本，使用ID或name作为最后的备选
+                if (!labelText) {
+                    if (element.id && !/^\d+$/.test(element.id)) {
+                        labelText = element.id;
+                    } else if (element.name && !/^\d+$/.test(element.name)) {
+                        labelText = element.name;
+                    }
+                }
+                
+                return labelText;
+            }
+            
+            // 获取选择框的选项文本
+            function getSelectOptionText(selectElement, value) {
+                if (selectElement.tagName.toLowerCase() === 'select') {
+                    const options = selectElement.querySelectorAll('option');
+                    for (let option of options) {
+                        if (option.value === value) {
+                            return option.innerText || option.textContent || value;
+                        }
+                    }
+                }
+                return value;
+            }
+            
             // 基础事件记录函数
             function recordEvent(eventType, element, eventData = {}) {
                 try {
+                    const labelText = getInputLabel(element);
+                    
                     const elementInfo = {
                         tag: element ? element.tagName.toLowerCase() : '',
                         id: element ? element.id || '' : '',
@@ -219,7 +424,9 @@ class RealtimeTestRecorder:
                         text: element ? (element.innerText || element.textContent || '').substring(0, 50) : '',
                         type: element ? element.type || '' : '',
                         name: element ? element.name || '' : '',
-                        value: element ? element.value || '' : ''
+                        value: element ? element.value || '' : '',
+                        label: labelText,
+                        placeholder: element ? element.placeholder || '' : ''
                     };
                     
                     const pageInfo = {
@@ -349,12 +556,13 @@ class RealtimeTestRecorder:
                 if (event.target.tagName.toLowerCase() === 'select') {
                     const selectedOption = event.target.options[event.target.selectedIndex];
                     changeData.selectedText = selectedOption ? selectedOption.text : '';
+                    changeData.optionText = getSelectOptionText(event.target, event.target.value);
                 }
                 
                 recordEvent('change', event.target, changeData);
             }, true);
             
-            console.log('RECORDER_DEBUG: 基础事件监听器注入完成（支持输入防抖）');
+            console.log('RECORDER_DEBUG: 基础事件监听器注入完成（支持输入防抖和增强的标签识别）');
             
         })();
         """
@@ -362,7 +570,7 @@ class RealtimeTestRecorder:
         try:
             await self.page.add_init_script(script)
             await self.page.evaluate(script)
-            logger.debug("基础事件监听脚本注入成功（支持输入防抖）")
+            logger.debug("基础事件监听脚本注入成功（支持输入防抖和增强的标签识别）")
         except Exception as e:
             logger.error(f"注入事件监听脚本失败: {e}")
     
@@ -445,30 +653,57 @@ class RealtimeTestRecorder:
             element_desc = self._get_element_description(analyzed_element, element_info)
             
             if event_type == 'click':
-                title = f"点击: {element_desc}"
+                title = f"点击了{element_desc}"
                 description = f"点击了 {element_desc}"
             elif event_type == 'input':
                 value = additional_data.get('value', '')
-                title = f"输入文本: {value[:20]}{'...' if len(value) > 20 else ''}"
-                description = f"在 {element_desc} 中输入: {value}"
+                if element_desc.endswith('输入框') or element_desc.endswith('文本区域') or '输入框' in element_desc:
+                    title = f"在{element_desc}中输入：{value[:20]}{'...' if len(value) > 20 else ''}"
+                    description = f"在 {element_desc} 中输入：{value}"
+                else:
+                    title = f"输入文本：{value[:20]}{'...' if len(value) > 20 else ''}"
+                    description = f"在 {element_desc} 中输入：{value}"
             elif event_type == 'keydown':
                 key = additional_data.get('key', '')
-                title = f"按键: {key}"
-                description = f"在 {element_desc} 中按下 {key} 键"
+                if key == 'Enter':
+                    title = f"在{element_desc}中按下回车键"
+                    description = f"在 {element_desc} 中按下 Enter 键"
+                elif key == 'Tab':
+                    title = f"按下Tab键切换到下一个元素"
+                    description = f"在 {element_desc} 中按下 Tab 键"
+                elif key == 'Escape':
+                    title = f"按下Escape键"
+                    description = f"在 {element_desc} 中按下 Escape 键"
+                else:
+                    title = f"按键：{key}"
+                    description = f"在 {element_desc} 中按下 {key} 键"
             elif event_type == 'change':
                 selected_text = additional_data.get('selectedText', '')
-                if selected_text:
-                    title = f"选择选项: {selected_text}"
-                    description = f"在下拉框中选择: {selected_text}"
+                option_text = additional_data.get('optionText', '')
+                value = additional_data.get('value', '')
+                
+                if selected_text and element_desc.endswith('下拉选择框'):
+                    title = f"在{element_desc}中选择：{selected_text}"
+                    description = f"在 {element_desc} 中选择：{selected_text}"
+                elif option_text and element_desc.endswith('下拉选择框'):
+                    title = f"在{element_desc}中选择：{option_text}"
+                    description = f"在 {element_desc} 中选择：{option_text}"
+                elif value and element_desc.endswith('下拉选择框'):
+                    title = f"在{element_desc}中选择：{value}"
+                    description = f"在 {element_desc} 中选择：{value}"
                 else:
-                    title = f"修改值: {additional_data.get('value', '')}"
-                    description = f"修改 {element_desc} 的值"
+                    title = f"修改{element_desc}的值"
+                    description = f"修改 {element_desc} 的值为：{value}"
             elif event_type == 'submit':
-                title = "提交表单"
-                description = "提交表单"
+                if element_desc.endswith('表单') or 'form' in element_desc.lower():
+                    title = f"提交{element_desc}"
+                    description = f"提交 {element_desc}"
+                else:
+                    title = "提交表单"
+                    description = "提交表单"
             else:
-                title = f"执行操作: {event_type}"
-                description = f"执行了 {event_type} 操作"
+                title = f"对{element_desc}执行{event_type}操作"
+                description = f"对 {element_desc} 执行了 {event_type} 操作"
             
             await self._record_action(
                 action_type=event_type,
@@ -486,56 +721,131 @@ class RealtimeTestRecorder:
     def _get_element_description(self, analyzed_element: Dict, element_info: Dict) -> str:
         """生成元素描述"""
         try:
+            # 获取标签文本
+            label_text = element_info.get('label', '').strip()
+            element_text = element_info.get('text', '').strip()
+            tag_name = element_info.get('tag', '').lower()
+            element_type = element_info.get('type', '').lower()
+            element_id = element_info.get('id', '')
+            element_class = element_info.get('class', '')
+            element_name = element_info.get('name', '')
+            element_placeholder = element_info.get('placeholder', '')
+            
+            # 对于输入框，使用标签信息生成友好描述
+            if tag_name == 'input':
+                input_type_desc = ''
+                if element_type == 'password':
+                    input_type_desc = '密码输入框'
+                elif element_type == 'email':
+                    input_type_desc = '邮箱输入框'
+                elif element_type == 'text' or element_type == '':
+                    input_type_desc = '文本输入框'
+                elif element_type == 'search':
+                    input_type_desc = '搜索框'
+                elif element_type == 'tel':
+                    input_type_desc = '电话输入框'
+                elif element_type == 'number':
+                    input_type_desc = '数字输入框'
+                elif element_type == 'url':
+                    input_type_desc = '网址输入框'
+                elif element_type == 'date':
+                    input_type_desc = '日期选择器'
+                elif element_type == 'time':
+                    input_type_desc = '时间选择器'
+                elif element_type == 'file':
+                    input_type_desc = '文件上传框'
+                elif element_type == 'checkbox':
+                    input_type_desc = '复选框'
+                elif element_type == 'radio':
+                    input_type_desc = '单选框'
+                elif element_type == 'button' or element_type == 'submit':
+                    input_type_desc = '按钮'
+                else:
+                    input_type_desc = f'{element_type}输入框'
+                
+                # 如果有标签文本，使用【标签】格式
+                if label_text:
+                    return f"【{label_text}】的{input_type_desc}"
+                
+                # 如果有placeholder，使用作为备选标签
+                if element_placeholder:
+                    return f"【{element_placeholder}】的{input_type_desc}"
+                
+                # 如果有元素文本，使用元素文本
+                if element_text:
+                    return f"【{element_text[:15]}】的{input_type_desc}"
+                
+                # 如果有ID，使用ID
+                if element_id:
+                    return f"ID为【{element_id}】的{input_type_desc}"
+                
+                # 如果有name，使用name
+                if element_name:
+                    return f"名为【{element_name}】的{input_type_desc}"
+                
+                return input_type_desc
+            
+            elif tag_name == 'textarea':
+                # 文本区域处理
+                if label_text:
+                    return f"【{label_text}】的文本区域"
+                if element_placeholder:
+                    return f"【{element_placeholder}】的文本区域"
+                if element_text:
+                    return f"【{element_text[:15]}】的文本区域"
+                return '文本区域'
+            
+            elif tag_name == 'select':
+                # 下拉选择框处理
+                if label_text:
+                    return f"【{label_text}】的下拉选择框"
+                if element_text:
+                    return f"【{element_text[:15]}】的下拉选择框"
+                if element_name:
+                    return f"名为【{element_name}】的下拉选择框"
+                return '下拉选择框'
+            
+            elif tag_name == 'button':
+                # 按钮处理
+                if element_text:
+                    return f"【{element_text[:15]}】按钮"
+                if label_text:
+                    return f"【{label_text}】按钮"
+                if element_id:
+                    return f"ID为【{element_id}】的按钮"
+                return '按钮'
+            
+            elif tag_name == 'a':
+                # 链接处理
+                if element_text:
+                    return f"【{element_text[:15]}】链接"
+                if label_text:
+                    return f"【{label_text}】链接"
+                return '链接'
+            
+            # 其他元素类型
+            if element_text:
+                return f"【{element_text[:15]}】{tag_name.upper()}元素"
+            
+            if label_text:
+                return f"【{label_text}】{tag_name.upper()}元素"
+            
             # 优先使用分析结果
             if analyzed_element and analyzed_element.get('text'):
                 text = analyzed_element['text'].strip()
                 if text:
-                    return f"'{text[:30]}...'" if len(text) > 30 else f"'{text}'"
+                    return f"【{text[:15]}】" if len(text) > 15 else f"【{text}】"
             
-            # 使用基本信息
-            element_id = element_info.get('id', '')
+            # 使用基本信息作为备选
             if element_id:
-                return f"ID为'{element_id}'的元素"
+                return f"ID为【{element_id}】的元素"
             
-            element_class = element_info.get('class', '')
             if element_class:
                 main_class = element_class.split(' ')[0]
-                return f"类名为'{main_class}'的元素"
+                return f"类名为【{main_class}】的元素"
             
-            element_text = element_info.get('text', '')
-            if element_text:
-                return f"'{element_text[:20]}...'" if len(element_text) > 20 else f"'{element_text}'"
-            
-            # 对于输入框，使用更友好的描述
-            tag_name = element_info.get('tag', '').lower()
-            element_type = element_info.get('type', '').lower()
-            element_name = element_info.get('name', '')
-            
-            if tag_name == 'input':
-                if element_type == 'password':
-                    return '密码输入框'
-                elif element_type == 'email':
-                    return '邮箱输入框'
-                elif element_type == 'text' or element_type == '':
-                    return '文本输入框'
-                elif element_type == 'search':
-                    return '搜索框'
-                elif element_type == 'tel':
-                    return '电话输入框'
-                else:
-                    return f'{element_type}输入框'
-            elif tag_name == 'textarea':
-                return '文本区域'
-            elif tag_name == 'select':
-                return '下拉选择框'
-            elif tag_name == 'button':
-                return '按钮'
-            elif tag_name == 'a':
-                return '链接'
-            
-            # 如果有name属性，使用name
             if element_name:
-                return f"名为'{element_name}'的{tag_name}元素"
+                return f"名为【{element_name}】的{tag_name}元素"
             
             # 最后的备选方案
             if tag_name:
@@ -543,7 +853,8 @@ class RealtimeTestRecorder:
             
             return "未知元素"
             
-        except Exception:
+        except Exception as e:
+            logger.error(f"生成元素描述失败: {e}")
             return "未知元素"
     
     async def _record_action(self, action_type: str, url: str = "", title: str = "", 
