@@ -21,7 +21,7 @@ from core.code_generator import code_generator
 
 
 class RealtimeTestRecorder:
-    """实时测试录制器 - 基础版本，专注于单窗口稳定录制"""
+    """实时测试录制器 - 支持多窗口录制"""
     
     def __init__(self):
         self.session: Optional[TestSession] = None
@@ -36,6 +36,10 @@ class RealtimeTestRecorder:
         self.browser: Optional[Browser] = None
         self.context: Optional[BrowserContext] = None
         self.page: Optional[Page] = None
+        
+        # 多窗口管理
+        self.pages: Dict[str, Page] = {}  # 存储所有活跃的页面，key为页面ID
+        self.page_counter = 0  # 页面计数器，用于生成唯一标识
         
         # 异步事件循环
         self.loop = None
@@ -147,6 +151,8 @@ class RealtimeTestRecorder:
             
             # 创建页面
             self.page = await self.context.new_page()
+            self.pages["main"] = self.page
+            self.page_counter += 1
             
             # 设置基础事件监听器
             await self._setup_basic_event_listeners()
@@ -177,21 +183,577 @@ class RealtimeTestRecorder:
         """设置基础事件监听器"""
         try:
             # 监听页面导航
-            self.page.on("framenavigated", self._on_navigation)
+            self.page.on("framenavigated", lambda frame: self._on_navigation(frame))
             
             # 监听页面加载
-            self.page.on("load", self._on_page_load)
+            self.page.on("load", lambda page: self._on_page_load(page))
             
             # 监听控制台消息
             self.page.on("console", self._on_console)
             
+            # 监听上下文级别的新页面事件（包括弹窗）
+            self.context.on("page", self._on_context_page)
+            
             # 注入基础事件监听脚本
             await self._inject_basic_event_script()
             
-            logger.info("基础事件监听器设置完成")
+            logger.info("基础事件监听器设置完成，已启用多窗口录制支持")
             
         except Exception as e:
             logger.error(f"设置事件监听器失败: {e}")
+
+    def _on_context_page(self, new_page):
+        """处理上下文级别的新页面事件（包括弹窗和新标签页）"""
+        try:
+            logger.info(f"检测到新页面: {new_page.url}")
+            asyncio.create_task(self._setup_popup_listeners(new_page))
+        except Exception as e:
+            logger.error(f"处理新页面事件失败: {e}")
+
+    async def _setup_popup_listeners(self, popup_page):
+        """为新窗口设置事件监听器"""
+        try:
+            page_id = f"page_{self.page_counter}"
+            self.page_counter += 1
+            self.pages[page_id] = popup_page
+            
+            # 监听页面导航
+            popup_page.on("framenavigated", lambda frame: self._on_navigation(frame))
+            
+            # 监听页面加载
+            popup_page.on("load", lambda page: self._on_page_load(page))
+            
+            # 监听控制台消息
+            popup_page.on("console", self._on_console)
+            
+            # 监听页面关闭
+            popup_page.on("close", lambda: self._on_page_close(page_id))
+            
+            # 注入基础事件监听脚本
+            await self._inject_basic_event_script_to_page(popup_page)
+            
+            logger.info(f"为新页面 {page_id} 设置了事件监听器")
+        except Exception as e:
+            logger.error(f"为新页面设置事件监听器失败: {e}")
+
+    def _on_page_close(self, page_id):
+        """处理页面关闭事件"""
+        try:
+            logger.info(f"页面 {page_id} 已关闭")
+            if page_id in self.pages:
+                del self.pages[page_id]
+        except Exception as e:
+            logger.error(f"处理页面关闭事件失败: {e}")
+
+    async def _inject_basic_event_script_to_page(self, page):
+        """向指定页面注入基础的事件监听脚本"""
+        script = r"""
+        (function() {
+            if (window.playwrightRecorderInjected) {
+                return 'already_injected';
+            }
+            
+            window.playwrightRecorderInjected = true;
+            
+            console.log('RECORDER_DEBUG: 注入基础事件监听器');
+            
+            // 输入防抖处理
+            const inputTimers = new Map();
+            const INPUT_DELAY = 1000; // 1秒防抖延迟
+            
+            // 清理标签文本
+            function cleanLabelText(text) {
+                if (!text) return '';
+                
+                // 移除前后空格
+                text = text.trim();
+                
+                // 移除前面的星号（支持各种星号字符）
+                text = text.replace(/^[*＊※●⚫︎⬤⏺⭐️★☆✱✲✳✴✵✶✷✸✹✺✻✼✽✾✿❀❁❂❃❄❅❆❇❈❉❊❋⁎⁑⁂⁕﹡]\s*/g, '');
+                
+                // 移除前面的数字序号（如：1.、1、等）
+                text = text.replace(/^[\d一二三四五六七八九十]+[.、．。:：]\s*/g, '');
+                
+                // 移除末尾的冒号和空格
+                text = text.replace(/[：:]*\s*$/g, '');
+                
+                // 如果文本被括号包围，移除括号
+                text = text.replace(/^[([{（【［｛](.+?)[)\]}）】］｝]$/g, '$1');
+                
+                // 移除常见的表单前缀词
+                const prefixes = ['请输入', '请选择', '输入', '选择', '填写'];
+                for (let prefix of prefixes) {
+                    if (text.startsWith(prefix)) {
+                        text = text.substring(prefix.length);
+                    }
+                }
+                
+                return text.trim();
+            }
+            
+            // 获取输入框关联的标签文本
+            function getInputLabel(element) {
+                let labelText = '';
+                let labels = [];
+                
+                // 特殊处理图标元素
+                if (element.classList && Array.from(element.classList).some(cls => cls.includes('glyphicon'))) {
+                    // 方法1: 检查title属性
+                    if (element.title) {
+                        labels.push(element.title);
+                    }
+                    
+                    // 方法2: 检查aria-label属性
+                    if (element.getAttribute('aria-label')) {
+                        labels.push(element.getAttribute('aria-label'));
+                    }
+                    
+                    // 方法3: 检查父元素的文本内容
+                    let parent = element.parentElement;
+                    if (parent) {
+                        // 克隆父元素以防止修改原始DOM
+                        const parentClone = parent.cloneNode(true);
+                        // 移除所有图标元素
+                        parentClone.querySelectorAll('.glyphicon').forEach(icon => icon.remove());
+                        const parentText = parentClone.innerText || parentClone.textContent;
+                        if (parentText.trim()) {
+                            labels.push(parentText.trim());
+                        }
+                    }
+                    
+                    // 方法4: 使用图标类名映射
+                    const iconClassMap = {
+                        'glyphicon-refresh': '刷新',
+                        'glyphicon-search': '搜索',
+                        'glyphicon-plus': '添加',
+                        'glyphicon-minus': '删除',
+                        'glyphicon-edit': '编辑',
+                        'glyphicon-trash': '删除',
+                        'glyphicon-ok': '确定',
+                        'glyphicon-remove': '取消',
+                        'glyphicon-save': '保存',
+                        'glyphicon-print': '打印',
+                        'glyphicon-download': '下载',
+                        'glyphicon-upload': '上传',
+                        'glyphicon-export': '导出',
+                        'glyphicon-import': '导入'
+                    };
+                    
+                    for (const className of element.classList) {
+                        if (iconClassMap[className]) {
+                            labels.push(iconClassMap[className]);
+                            break;
+                        }
+                    }
+                }
+                
+                // 原有的标签文本查找逻辑
+                // 方法1: 查找前面的所有文本节点和元素
+                function findPrecedingText(element) {
+                    const textsFound = [];
+                    
+                    // 获取所有前面的兄弟节点
+                    let previousNode = element.previousSibling;
+                    while (previousNode) {
+                        // 如果是文本节点
+                        if (previousNode.nodeType === 3) {
+                            const text = previousNode.textContent.trim();
+                            if (text) textsFound.unshift(text);
+                        }
+                        // 如果是元素节点
+                        else if (previousNode.nodeType === 1) {
+                            const nodeName = previousNode.nodeName.toLowerCase();
+                            // 如果是label或常见的文本容器元素
+                            if (['label', 'span', 'div', 'p', 'td', 'th'].includes(nodeName)) {
+                                const text = previousNode.innerText || previousNode.textContent;
+                                if (text.trim()) textsFound.unshift(text.trim());
+                            }
+                        }
+                        previousNode = previousNode.previousSibling;
+                    }
+                    
+                    // 如果在兄弟节点中没找到，尝试查找父元素的前面的文本
+                    if (textsFound.length === 0 && element.parentElement) {
+                        let parent = element.parentElement;
+                        let foundInParent = false;
+                        
+                        // 检查父元素的前面的兄弟节点
+                        previousNode = parent.previousSibling;
+                        while (previousNode && !foundInParent) {
+                            if (previousNode.nodeType === 3) {
+                                const text = previousNode.textContent.trim();
+                                if (text) {
+                                    textsFound.unshift(text);
+                                    foundInParent = true;
+                                }
+                            } else if (previousNode.nodeType === 1) {
+                                const text = previousNode.innerText || previousNode.textContent;
+                                if (text.trim()) {
+                                    textsFound.unshift(text.trim());
+                                    foundInParent = true;
+                                }
+                            }
+                            previousNode = previousNode.previousSibling;
+                        }
+                        
+                        // 如果还没找到，检查父元素本身是否包含文本
+                        if (!foundInParent) {
+                            // 克隆父元素以防止修改原始DOM
+                            const parentClone = parent.cloneNode(true);
+                            // 移除目标输入框及其后面的所有元素
+                            let found = false;
+                            Array.from(parentClone.children).forEach(child => {
+                                if (found || child.isEqualNode(element)) {
+                                    child.remove();
+                                    found = true;
+                                }
+                            });
+                            const text = parentClone.innerText || parentClone.textContent;
+                            if (text.trim()) textsFound.unshift(text.trim());
+                        }
+                    }
+                    
+                    return textsFound;
+                }
+                
+                // 首先尝试查找前面的文本
+                const precedingTexts = findPrecedingText(element);
+                if (precedingTexts.length > 0) {
+                    labels.push(...precedingTexts);
+                }
+                
+                // 方法2: 通过for属性关联的label
+                if (element.id) {
+                    const label = document.querySelector(`label[for="${element.id}"]`);
+                    if (label) {
+                        labels.push(label.innerText || label.textContent || '');
+                    }
+                }
+                
+                // 方法3: 父级label元素
+                const parentLabel = element.closest('label');
+                if (parentLabel) {
+                    const clone = parentLabel.cloneNode(true);
+                    const inputs = clone.querySelectorAll('input');
+                    inputs.forEach(input => input.remove());
+                    labels.push(clone.innerText || clone.textContent || '');
+                }
+                
+                // 方法4: 通过aria-label
+                if (element.getAttribute('aria-label')) {
+                    labels.push(element.getAttribute('aria-label'));
+                }
+                
+                // 方法5: 通过aria-labelledby
+                if (element.getAttribute('aria-labelledby')) {
+                    const labelId = element.getAttribute('aria-labelledby');
+                    const labelElement = document.getElementById(labelId);
+                    if (labelElement) {
+                        labels.push(labelElement.innerText || labelElement.textContent || '');
+                    }
+                }
+                
+                // 方法6: 查找表格中的表头
+                const td = element.closest('td');
+                if (td) {
+                    const tr = td.closest('tr');
+                    const table = td.closest('table');
+                    if (tr && table) {
+                        const cellIndex = Array.from(tr.children).indexOf(td);
+                        const headerRow = table.querySelector('tr:first-child, thead tr');
+                        if (headerRow && headerRow.children[cellIndex]) {
+                            labels.push(headerRow.children[cellIndex].innerText || headerRow.children[cellIndex].textContent || '');
+                        }
+                    }
+                }
+                
+                // 方法7: 通过placeholder作为备选
+                if (element.placeholder) {
+                    labels.push(element.placeholder);
+                }
+                
+                // 方法8: 通过name属性作为最后备选
+                if (element.name) {
+                    labels.push(element.name);
+                }
+                
+                // 处理所有找到的标签文本
+                for (let text of labels) {
+                    text = cleanLabelText(text);
+                    // 特别处理：如果清理后的文本是中文，优先使用它
+                    if (text && /[\u4e00-\u9fa5]/.test(text)) {
+                        labelText = text;
+                        break;
+                    }
+                    // 否则继续查找
+                    if (text && !labelText) {
+                        labelText = text;
+                    }
+                }
+                
+                // 如果没有找到任何标签文本，使用ID或name作为最后的备选
+                if (!labelText) {
+                    if (element.id && !/^\d+$/.test(element.id)) {
+                        labelText = element.id;
+                    } else if (element.name && !/^\d+$/.test(element.name)) {
+                        labelText = element.name;
+                    }
+                }
+                
+                return labelText;
+            }
+            
+            // 获取选择框的选项文本
+            function getSelectOptionText(selectElement, value) {
+                if (selectElement.tagName.toLowerCase() === 'select') {
+                    const options = selectElement.querySelectorAll('option');
+                    for (let option of options) {
+                        if (option.value === value) {
+                            return option.innerText || option.textContent || value;
+                        }
+                    }
+                }
+                return value;
+            }
+            
+            // 基础事件记录函数
+            function recordEvent(eventType, element, eventData = {}) {
+                try {
+                    const labelText = getInputLabel(element);
+                    
+                    const elementInfo = {
+                        tag: element ? element.tagName.toLowerCase() : '',
+                        id: element ? element.id || '' : '',
+                        class: element ? element.className || '' : '',
+                        text: element ? (element.innerText || element.textContent || '').substring(0, 50) : '',
+                        type: element ? element.type || '' : '',
+                        name: element ? element.name || '' : '',
+                        value: element ? element.value || '' : '',
+                        label: labelText,
+                        placeholder: element ? element.placeholder || '' : ''
+                    };
+                    
+                    const pageInfo = {
+                        url: window.location.href,
+                        title: document.title
+                    };
+                    
+                    const eventPayload = {
+                        eventType: eventType,
+                        element: elementInfo,
+                        page: pageInfo,
+                        eventData: eventData,
+                        timestamp: Date.now()
+                    };
+                    
+                    console.log('RECORDER_EVENT:' + eventType + ':' + JSON.stringify(eventPayload));
+                    
+                } catch (error) {
+                    console.error('RECORDER_DEBUG: 事件记录失败:', error);
+                }
+            }
+            
+            // 防抖输入记录函数
+            function recordInputWithDebounce(element) {
+                const elementKey = element.id || element.name || element.tagName + '_' + element.type;
+                
+                // 清除之前的定时器
+                if (inputTimers.has(elementKey)) {
+                    clearTimeout(inputTimers.get(elementKey));
+                }
+                
+                // 设置新的定时器
+                const timer = setTimeout(() => {
+                    const isPassword = element.type === 'password';
+                    recordEvent('input', element, {
+                        value: isPassword ? '***' : element.value,
+                        finalInput: true
+                    });
+                    inputTimers.delete(elementKey);
+                }, INPUT_DELAY);
+                
+                inputTimers.set(elementKey, timer);
+            }
+            
+            // 点击事件
+            document.addEventListener('click', function(event) {
+                // 处理 iCheck 相关元素
+                if (event.target.classList.contains('iCheck-helper')) {
+                    // 获取关联的 input 元素
+                    const input = event.target.previousElementSibling;
+                    if (input && (input.type === 'radio' || input.type === 'checkbox')) {
+                        // 使用关联的 input 元素记录事件
+                        recordEvent('change', input, {
+                            checked: !input.checked,
+                            value: input.value,
+                            type: input.type
+                        });
+                        return;
+                    }
+                }
+                
+                // 如果是select元素或其子元素，不记录点击事件
+                if (event.target.tagName.toLowerCase() === 'select' ||
+                    event.target.closest('select') ||
+                    event.target.tagName.toLowerCase() === 'option') {
+                    return;
+                }
+                
+                recordEvent('click', event.target, {
+                    clientX: event.clientX,
+                    clientY: event.clientY,
+                    button: event.button
+                });
+            }, true);
+            
+            // 输入事件（使用防抖）
+            document.addEventListener('input', function(event) {
+                // 如果是select、radio或checkbox元素，不记录input事件
+                if (event.target.tagName.toLowerCase() === 'select' ||
+                    event.target.type === 'radio' ||
+                    event.target.type === 'checkbox') {
+                    return;
+                }
+                recordInputWithDebounce(event.target);
+            }, true);
+            
+            // 失焦事件（确保记录最终输入）
+            document.addEventListener('blur', function(event) {
+                const element = event.target;
+                if (element.tagName && ['INPUT', 'TEXTAREA'].includes(element.tagName.toLowerCase())) {
+                    const elementKey = element.id || element.name || element.tagName + '_' + element.type;
+                    
+                    // 清除防抖定时器并立即记录
+                    if (inputTimers.has(elementKey)) {
+                        clearTimeout(inputTimers.get(elementKey));
+                        inputTimers.delete(elementKey);
+                    }
+                    
+                    // 立即记录最终值
+                    const isPassword = element.type === 'password';
+                    if (element.value) {  // 只有非空值才记录
+                        recordEvent('input', element, {
+                            value: isPassword ? '***' : element.value,
+                            finalInput: true,
+                            trigger: 'blur'
+                        });
+                    }
+                }
+            }, true);
+            
+            // 键盘事件
+            document.addEventListener('keydown', function(event) {
+                if (['Enter', 'Tab', 'Escape'].includes(event.key)) {
+                    recordEvent('keydown', event.target, {
+                        key: event.key
+                    });
+                    
+                    // 如果是Enter键在输入框中，立即记录输入值
+                    if (event.key === 'Enter') {
+                        const element = event.target;
+                        if (element.tagName && ['INPUT', 'TEXTAREA'].includes(element.tagName.toLowerCase())) {
+                            const elementKey = element.id || element.name || element.tagName + '_' + element.type;
+                            
+                            // 清除防抖定时器
+                            if (inputTimers.has(elementKey)) {
+                                clearTimeout(inputTimers.get(elementKey));
+                                inputTimers.delete(elementKey);
+                            }
+                            
+                            // 立即记录
+                            const isPassword = element.type === 'password';
+                            if (element.value) {
+                                recordEvent('input', element, {
+                                    value: isPassword ? '***' : element.value,
+                                    finalInput: true,
+                                    trigger: 'enter'
+                                });
+                            }
+                        }
+                    }
+                }
+            }, true);
+            
+            // 表单提交
+            document.addEventListener('submit', function(event) {
+                recordEvent('submit', event.target, {
+                    action: event.target.action || ''
+                });
+            }, true);
+            
+            // 选择改变
+            document.addEventListener('change', function(event) {
+                const target = event.target;
+                if (target.tagName.toLowerCase() === 'select') {
+                    const selectedOption = target.options[target.selectedIndex];
+                    const selectedText = selectedOption ? (selectedOption.text || '').trim() : '';
+                    const selectedValue = target.value || '';
+                    
+                    // 只记录一次change事件，使用显示文本
+                    recordEvent('change', target, {
+                        value: selectedText, // 只使用显示文本
+                        selectedText: selectedText,
+                        actualValue: selectedValue // 保留实际值作为备用
+                    });
+                } else if (target.type === 'radio' || target.type === 'checkbox') {
+                    // 获取关联的标签文本
+                    let labelText = '';
+                    
+                    // 1. 检查for属性关联的label
+                    if (target.id) {
+                        const label = document.querySelector(`label[for="${target.id}"]`);
+                        if (label) {
+                            labelText = label.textContent.trim();
+                        }
+                    }
+                    
+                    // 2. 检查父级label
+                    if (!labelText) {
+                        const parentLabel = target.closest('label');
+                        if (parentLabel) {
+                            const clone = parentLabel.cloneNode(true);
+                            const inputs = clone.querySelectorAll('input');
+                            inputs.forEach(input => input.remove());
+                            labelText = clone.textContent.trim();
+                        }
+                    }
+                    
+                    // 3. 如果还没找到，尝试使用相邻文本
+                    if (!labelText) {
+                        let sibling = target.nextSibling;
+                        while (sibling && !labelText) {
+                            if (sibling.nodeType === 3) { // 文本节点
+                                labelText = sibling.textContent.trim();
+                            }
+                            sibling = sibling.nextSibling;
+                        }
+                    }
+                    
+                    recordEvent('change', target, {
+                        type: target.type,
+                        checked: target.checked,
+                        value: labelText || target.value || (target.checked ? '选中' : '取消选中'),
+                        labelText: labelText
+                    });
+                } else {
+                    // 其他元素的change事件处理
+                    recordEvent('change', target, {
+                        value: target.value || ''
+                    });
+                }
+            }, true);
+            
+            console.log('RECORDER_DEBUG: 基础事件监听器注入完成（支持输入防抖和增强的标签识别）');
+            
+        })();
+        """
+        
+        try:
+            await page.add_init_script(script)
+            await page.evaluate(script)
+            logger.debug("基础事件监听脚本注入成功（支持输入防抖和增强的标签识别）")
+        except Exception as e:
+            logger.error(f"注入事件监听脚本失败: {e}")
     
     async def _inject_basic_event_script(self):
         """注入基础的事件监听脚本"""
@@ -382,7 +944,7 @@ class RealtimeTestRecorder:
                 const parentLabel = element.closest('label');
                 if (parentLabel) {
                     const clone = parentLabel.cloneNode(true);
-                    const inputs = clone.querySelectorAll('input, textarea, select');
+                    const inputs = clone.querySelectorAll('input');
                     inputs.forEach(input => input.remove());
                     labels.push(clone.innerText || clone.textContent || '');
                 }

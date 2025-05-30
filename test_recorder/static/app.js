@@ -208,6 +208,7 @@ function handleActionRecorded(action) {
         console.error('操作记录内容:', action);
         showNotification(`操作记录处理错误: ${error.message}`, 'danger');
     }
+
 }
 
 // 添加操作到实时显示
