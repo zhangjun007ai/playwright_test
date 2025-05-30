@@ -525,6 +525,28 @@ class RealtimeTestRecorder:
             
             // 点击事件
             document.addEventListener('click', function(event) {
+                // 处理 iCheck 相关元素
+                if (event.target.classList.contains('iCheck-helper')) {
+                    // 获取关联的 input 元素
+                    const input = event.target.previousElementSibling;
+                    if (input && (input.type === 'radio' || input.type === 'checkbox')) {
+                        // 使用关联的 input 元素记录事件
+                        recordEvent('change', input, {
+                            checked: !input.checked,
+                            value: input.value,
+                            type: input.type
+                        });
+                        return;
+                    }
+                }
+                
+                // 如果是select元素或其子元素，不记录点击事件
+                if (event.target.tagName.toLowerCase() === 'select' ||
+                    event.target.closest('select') ||
+                    event.target.tagName.toLowerCase() === 'option') {
+                    return;
+                }
+                
                 recordEvent('click', event.target, {
                     clientX: event.clientX,
                     clientY: event.clientY,
@@ -534,6 +556,12 @@ class RealtimeTestRecorder:
             
             // 输入事件（使用防抖）
             document.addEventListener('input', function(event) {
+                // 如果是select、radio或checkbox元素，不记录input事件
+                if (event.target.tagName.toLowerCase() === 'select' ||
+                    event.target.type === 'radio' ||
+                    event.target.type === 'checkbox') {
+                    return;
+                }
                 recordInputWithDebounce(event.target);
             }, true);
             
@@ -603,15 +631,64 @@ class RealtimeTestRecorder:
             
             // 选择改变
             document.addEventListener('change', function(event) {
-                let changeData = { value: event.target.value || '' };
-                
-                if (event.target.tagName.toLowerCase() === 'select') {
-                    const selectedOption = event.target.options[event.target.selectedIndex];
-                    changeData.selectedText = selectedOption ? selectedOption.text : '';
-                    changeData.optionText = getSelectOptionText(event.target, event.target.value);
+                const target = event.target;
+                if (target.tagName.toLowerCase() === 'select') {
+                    const selectedOption = target.options[target.selectedIndex];
+                    const selectedText = selectedOption ? (selectedOption.text || '').trim() : '';
+                    const selectedValue = target.value || '';
+                    
+                    // 只记录一次change事件，使用显示文本
+                    recordEvent('change', target, {
+                        value: selectedText, // 只使用显示文本
+                        selectedText: selectedText,
+                        actualValue: selectedValue // 保留实际值作为备用
+                    });
+                } else if (target.type === 'radio' || target.type === 'checkbox') {
+                    // 获取关联的标签文本
+                    let labelText = '';
+                    
+                    // 1. 检查for属性关联的label
+                    if (target.id) {
+                        const label = document.querySelector(`label[for="${target.id}"]`);
+                        if (label) {
+                            labelText = label.textContent.trim();
+                        }
+                    }
+                    
+                    // 2. 检查父级label
+                    if (!labelText) {
+                        const parentLabel = target.closest('label');
+                        if (parentLabel) {
+                            const clone = parentLabel.cloneNode(true);
+                            const inputs = clone.querySelectorAll('input');
+                            inputs.forEach(input => input.remove());
+                            labelText = clone.textContent.trim();
+                        }
+                    }
+                    
+                    // 3. 如果还没找到，尝试使用相邻文本
+                    if (!labelText) {
+                        let sibling = target.nextSibling;
+                        while (sibling && !labelText) {
+                            if (sibling.nodeType === 3) { // 文本节点
+                                labelText = sibling.textContent.trim();
+                            }
+                            sibling = sibling.nextSibling;
+                        }
+                    }
+                    
+                    recordEvent('change', target, {
+                        type: target.type,
+                        checked: target.checked,
+                        value: labelText || target.value || (target.checked ? '选中' : '取消选中'),
+                        labelText: labelText
+                    });
+                } else {
+                    // 其他元素的change事件处理
+                    recordEvent('change', target, {
+                        value: target.value || ''
+                    });
                 }
-                
-                recordEvent('change', event.target, changeData);
             }, true);
             
             console.log('RECORDER_DEBUG: 基础事件监听器注入完成（支持输入防抖和增强的标签识别）');
@@ -710,7 +787,7 @@ class RealtimeTestRecorder:
             # 生成标题（只使用主要描述）
             if event_type == 'click':
                 title = f"点击{main_desc}"
-                description = f"点击 {element_desc}"  # 详细描述也使用"点击"
+                description = f"点击 {element_desc}"
             elif event_type == 'input':
                 value = additional_data.get('value', '')
                 if '输入框' in tech_details or '文本区域' in tech_details:
@@ -730,19 +807,35 @@ class RealtimeTestRecorder:
                     title = f"按键：{key}"
                 description = f"在 {element_desc} 中按下 {key} 键"
             elif event_type == 'change':
-                selected_text = additional_data.get('selectedText', '')
-                option_text = additional_data.get('optionText', '')
-                value = additional_data.get('value', '')
-                
-                if selected_text and '下拉选择框' in tech_details:
-                    title = f"在{main_desc}中选择：{selected_text}"
-                elif option_text and '下拉选择框' in tech_details:
-                    title = f"在{main_desc}中选择：{option_text}"
-                elif value and '下拉选择框' in tech_details:
-                    title = f"在{main_desc}中选择：{value}"
+                # 特别处理下拉框的change事件
+                if element_info.get('tag', '').lower() == 'select':
+                    selected_text = additional_data.get('selectedText', '')
+                    if selected_text:
+                        title = f"在{main_desc}中选择：{selected_text}"
+                        description = f"在 {element_desc} 中选择：{selected_text}"
+                    else:
+                        # 如果没有selectedText，尝试使用value
+                        value = additional_data.get('value', '')
+                        title = f"在{main_desc}中选择：{value}"
+                        description = f"在 {element_desc} 中选择：{value}"
+                # 特别处理单选框和复选框
+                elif element_info.get('type', '') in ['radio', 'checkbox']:
+                    is_checked = additional_data.get('checked', False)
+                    label_text = additional_data.get('labelText', '')
+                    value = additional_data.get('value', '')
+                    display_text = label_text or value
+                    
+                    if element_info['type'] == 'radio':
+                        title = f"选择{main_desc}：{display_text}"
+                        description = f"选择 {element_desc}：{display_text}"
+                    else:  # checkbox
+                        action = "选中" if is_checked else "取消选中"
+                        title = f"{action}{main_desc}：{display_text}"
+                        description = f"{action} {element_desc}：{display_text}"
                 else:
+                    value = additional_data.get('value', '')
                     title = f"修改{main_desc}的值"
-                description = f"修改 {element_desc} 的值为：{value}"
+                    description = f"修改 {element_desc} 的值为：{value}"
             elif event_type == 'submit':
                 if '表单' in tech_details:
                     title = f"提交{main_desc}"
@@ -808,6 +901,13 @@ class RealtimeTestRecorder:
             element_class = element_info.get('class', '')
             element_name = element_info.get('name', '')
             element_placeholder = element_info.get('placeholder', '')
+            
+            # 处理 iCheck 相关元素
+            if element_class and 'iCheck-helper' in element_class:
+                if element_type == 'radio':
+                    return f"【{label_text or element_text or '未知选项'}】单选框"
+                elif element_type == 'checkbox':
+                    return f"【{label_text or element_text or '未知选项'}】复选框"
             
             # 特殊处理图标元素
             if element_class and 'glyphicon' in element_class:
@@ -966,12 +1066,12 @@ class RealtimeTestRecorder:
             
             # 截图
             screenshot_path = ""
-            try:
-                screenshot_filename = f"screenshot_{len(self.session.actions) + 1}_{int(time.time())}.png"
-                screenshot_path = str(settings.SCREENSHOTS_DIR / screenshot_filename)
-                await self.page.screenshot(path=screenshot_path, full_page=True)
-            except Exception as e:
-                logger.warning(f"截图失败: {e}")
+            # try:
+            #     screenshot_filename = f"screenshot_{len(self.session.actions) + 1}_{int(time.time())}.png"
+            #     screenshot_path = str(settings.SCREENSHOTS_DIR / screenshot_filename)
+            #     await self.page.screenshot(path=screenshot_path, full_page=True)
+            # except Exception as e:
+            #     logger.warning(f"截图失败: {e}")
             
             # 创建操作记录
             action_record = ActionRecord(
