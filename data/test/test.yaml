@@ -1,0 +1,21 @@
+# 公共参数
+case_common:
+  allureEpic: 开发平台接口
+  allureFeature: ceshi
+  allureStory: ceshi
+
+test_01:
+    host: ${{host()}}
+    url: /api/example
+    method: GET
+    detail: 示例用例
+    headers:
+      Content-Type: application/json
+    requestType: params
+    is_run: true
+    data:
+    dependence_case: false
+    dependence_case_data:
+    assert:
+      status_code: 200
+    sql:

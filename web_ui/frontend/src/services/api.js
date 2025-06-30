@@ -101,6 +101,11 @@ export const apiService = {
     return api.post(`/test-cases/${encodeURIComponent(filePath)}`, { content })
   },
   
+  // 别名方法，保持兼容性
+  saveTestCaseContent(filePath, content) {
+    return this.saveTestCaseFile(filePath, content)
+  },
+  
   deleteTestCaseFile(filePath) {
     return api.delete(`/test-cases/${encodeURIComponent(filePath)}`)
   },
@@ -117,6 +122,16 @@ export const apiService = {
   
   getGenerationStatus() {
     return api.get('/generate-code/status')
+  },
+  
+  // 生成代码（带配置选项）
+  generateCodeWithOptions(options = {}) {
+    return api.post('/generate-code', {
+      scope: options.scope || 'all',
+      selected_files: options.selectedFiles || [],
+      overwrite_strategy: options.overwriteStrategy || 'ask',
+      options: options.options || []
+    })
   },
   
   // 测试执行
@@ -138,6 +153,28 @@ export const apiService = {
   
   getExecutionHistory() {
     return api.get('/execute/history')
+  },
+  
+  // 执行单个测试用例
+  executeSingleTestCase(filePath, caseId) {
+    return api.post('/execute/single', {
+      file_path: filePath,
+      case_id: caseId
+    })
+  },
+  
+  // 验证YAML文件
+  validateYamlFile(filePath) {
+    return api.post('/validate/yaml', {
+      file_path: filePath
+    })
+  },
+  
+  // 格式化YAML文件
+  formatYamlFile(filePath) {
+    return api.post('/format/yaml', {
+      file_path: filePath
+    })
   },
   
   // 报告管理

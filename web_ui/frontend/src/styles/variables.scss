@@ -32,10 +32,19 @@ $shadow-light: 0 2px 12px rgba(0, 0, 0, 0.1);
 $shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.15);
 $shadow-heavy: 0 8px 30px rgba(0, 0, 0, 0.2);
 
+// 边框圆角
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+$border-radius-lg: 12px;
+$border-radius-xl: 16px;
+
 // 手绘风格
 $sketch-border: 2px solid $primary-color;
 $sketch-radius: 8px;
+$sketch-radius-lg: 12px;
 $sketch-shadow: 0 3px 15px rgba(102, 126, 234, 0.2);
+$sketch-shadow-md: 0 4px 20px rgba(102, 126, 234, 0.15);
+$sketch-shadow-lg: 0 6px 30px rgba(102, 126, 234, 0.25);
 
 // 科技发光效果
 $glow-primary: 0 0 20px rgba(102, 126, 234, 0.3);

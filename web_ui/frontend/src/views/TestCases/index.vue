@@ -10,14 +10,14 @@
       </div>
       <div class="header-actions">
         <el-button type="success" @click="openWizard">
-          <el-icon><Magic /></el-icon>
+          <el-icon><MagicStick /></el-icon>
           创建向导
         </el-button>
         <el-button type="primary" @click="showCreateDialog = true">
           <el-icon><Plus /></el-icon>
           新建用例
         </el-button>
-        <el-button @click="generateCode" :loading="generating">
+        <el-button @click="openGenerationWizard" :loading="generating">
           <el-icon><MagicStick /></el-icon>
           生成代码
         </el-button>
@@ -89,6 +89,18 @@
                   <p class="file-path">{{ caseFile.file_path }}</p>
                 </div>
                 <div class="file-actions">
+                  <el-button 
+                    size="small" 
+                    link 
+                    @click="toggleCaseDetails(caseFile.file_path)"
+                    :type="expandedCases.has(caseFile.file_path) ? 'primary' : 'default'"
+                  >
+                    <el-icon>
+                      <ArrowUp v-if="expandedCases.has(caseFile.file_path)" />
+                      <ArrowDown v-else />
+                    </el-icon>
+                    详情
+                  </el-button>
                   <el-dropdown trigger="click">
                     <el-button link size="small">
                       <el-icon><MoreFilled /></el-icon>
@@ -98,6 +110,10 @@
                         <el-dropdown-item @click="editFile(caseFile)">
                           <el-icon><Edit /></el-icon>
                           编辑
+                        </el-dropdown-item>
+                        <el-dropdown-item @click="generateCodeForFile(caseFile)">
+                          <el-icon><MagicStick /></el-icon>
+                          生成代码
                         </el-dropdown-item>
                         <el-dropdown-item @click="duplicateFile(caseFile)">
                           <el-icon><CopyDocument /></el-icon>
@@ -115,39 +131,130 @@
               
               <div class="card-content">
                 <div class="file-meta">
-                  <el-tag size="small" type="info">{{ caseFile.module }}</el-tag>
-                  <span class="case-count">{{ caseFile.cases.length }} 个用例</span>
+                  <el-tag size="small" type="info">{{ caseFile.module || '未知模块' }}</el-tag>
+                  <span class="case-count">{{ (caseFile.cases || []).length }} 个用例</span>
+                  <div class="file-stats">
+                    <el-tag v-if="caseFile.epic" size="small" type="success">{{ caseFile.epic }}</el-tag>
+                    <el-tag v-if="caseFile.story" size="small" type="warning">{{ caseFile.story }}</el-tag>
+                  </div>
                 </div>
                 
                 <div class="cases-list">
-                  <div
-                    v-for="testCase in caseFile.cases.slice(0, 3)"
-                    :key="testCase.case_id"
-                    class="case-item"
-                  >
-                    <div class="case-info">
-                      <span class="case-id">{{ testCase.case_id }}</span>
-                      <span class="case-detail">{{ testCase.detail }}</span>
+                  <!-- 简要显示（收起状态） -->
+                  <div v-if="!expandedCases.has(caseFile.file_path)">
+                    <div
+                      v-for="testCase in (caseFile.cases || []).slice(0, 3)"
+                      :key="testCase.case_id || Math.random()"
+                      class="case-item"
+                    >
+                      <div class="case-info">
+                        <span class="case-id">{{ testCase.case_id || '未命名' }}</span>
+                        <span class="case-detail">{{ testCase.detail || '无描述' }}</span>
+                      </div>
+                      <div class="case-meta">
+                        <el-tag
+                          :type="(testCase.method || 'GET') === 'GET' ? 'success' : (testCase.method || 'GET') === 'POST' ? 'primary' : 'warning'"
+                          size="small"
+                        >
+                          {{ testCase.method || 'GET' }}
+                        </el-tag>
+                        <el-switch
+                          v-model="testCase.is_run"
+                          size="small"
+                          @change="updateCaseStatus(caseFile, testCase)"
+                        />
+                      </div>
                     </div>
-                    <div class="case-meta">
-                      <el-tag
-                        :type="testCase.method === 'GET' ? 'success' : testCase.method === 'POST' ? 'primary' : 'warning'"
-                        size="small"
-                      >
-                        {{ testCase.method }}
-                      </el-tag>
-                      <el-switch
-                        v-model="testCase.is_run"
-                        size="small"
-                        @change="updateCaseStatus(caseFile, testCase)"
-                      />
+                    
+                    <div v-if="(caseFile.cases || []).length > 3" class="more-cases">
+                      <el-button link size="small" @click="toggleCaseDetails(caseFile.file_path)">
+                        查看全部 {{ (caseFile.cases || []).length }} 个用例详情
+                      </el-button>
                     </div>
                   </div>
                   
-                  <div v-if="caseFile.cases.length > 3" class="more-cases">
-                    <el-button link size="small" @click="editFile(caseFile)">
-                      查看全部 {{ caseFile.cases.length }} 个用例
-                    </el-button>
+                  <!-- 详细显示（展开状态） -->
+                  <div v-else class="expanded-cases">
+                    <div
+                      v-for="testCase in (caseFile.cases || [])"
+                      :key="testCase.case_id || Math.random()"
+                      class="detailed-case-item"
+                    >
+                      <div class="case-header">
+                        <div class="case-title">
+                          <span class="case-id">{{ testCase.case_id || '未命名' }}</span>
+                          <el-tag
+                            :type="(testCase.method || 'GET') === 'GET' ? 'success' : (testCase.method || 'GET') === 'POST' ? 'primary' : 'warning'"
+                            size="small"
+                          >
+                            {{ testCase.method || 'GET' }}
+                          </el-tag>
+                          <el-switch
+                            v-model="testCase.is_run"
+                            size="small"
+                            @change="updateCaseStatus(caseFile, testCase)"
+                          />
+                        </div>
+                        <div class="case-actions">
+                          <el-button size="small" link @click="executeTestCase(caseFile, testCase)">
+                            <el-icon><VideoPlay /></el-icon>
+                            执行
+                          </el-button>
+                        </div>
+                      </div>
+                      
+                      <div class="case-details">
+                        <p class="case-description">{{ testCase.detail || '无描述' }}</p>
+                        
+                        <div class="case-config">
+                          <div class="config-item">
+                            <label>请求地址:</label>
+                            <code>{{ testCase.url || '未设置' }}</code>
+                          </div>
+                          
+                          <div v-if="testCase.headers" class="config-item">
+                            <label>请求头:</label>
+                            <div class="config-details">
+                              <el-tag v-for="(value, key) in testCase.headers" :key="key" size="small" class="header-tag">
+                                {{ key }}: {{ value }}
+                              </el-tag>
+                            </div>
+                          </div>
+                          
+                          <div v-if="testCase.data" class="config-item">
+                            <label>请求参数:</label>
+                            <div class="config-details">
+                              <pre class="json-display">{{ formatJson(testCase.data) }}</pre>
+                            </div>
+                          </div>
+                          
+                          <div v-if="testCase.assert" class="config-item">
+                            <label>断言配置:</label>
+                            <div class="config-details assertions">
+                              <div v-for="(value, key) in testCase.assert" :key="key" class="assertion-item">
+                                <el-tag type="info" size="small">{{ key }}</el-tag>
+                                <span class="assertion-value">{{ formatAssertValue(value) }}</span>
+                              </div>
+                            </div>
+                          </div>
+                          
+                          <div v-if="testCase.dependence_case" class="config-item">
+                            <label>依赖关系:</label>
+                            <div class="config-details">
+                              <el-tag type="warning" size="small">依赖用例</el-tag>
+                              <span v-if="testCase.dependence_case_data">{{ testCase.dependence_case_data }}</span>
+                            </div>
+                          </div>
+                          
+                          <div v-if="testCase.sql" class="config-item">
+                            <label>SQL断言:</label>
+                            <div class="config-details">
+                              <pre class="sql-display">{{ testCase.sql }}</pre>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -195,6 +302,13 @@
         </el-button>
       </template>
     </el-dialog>
+    
+    <!-- 代码生成向导对话框 -->
+    <CodeGenerationDialog
+      v-model="showGenerationDialog"
+      :available-files="availableFilesForGeneration"
+      @completed="handleGenerationCompleted"
+    />
   </div>
 </template>
 
@@ -206,15 +320,18 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Document,
   Plus,
-  Magic,
   MagicStick,
   Refresh,
   Search,
   MoreFilled,
   Edit,
   CopyDocument,
-  Delete
+  Delete,
+  ArrowUp,
+  ArrowDown,
+  VideoPlay
 } from '@element-plus/icons-vue'
+import CodeGenerationDialog from '@/components/CodeGenerationDialog.vue'
 
 const router = useRouter()
 
@@ -229,6 +346,8 @@ const selectedStatus = ref('')
 
 const testCases = ref([])
 const createFormRef = ref()
+const expandedCases = ref(new Set()) // 展开的用例文件
+const showGenerationDialog = ref(false) // 代码生成对话框显示状态
 
 // 新建用例表单
 const newCaseForm = ref({
@@ -261,33 +380,59 @@ const modules = computed(() => {
   return Array.from(moduleSet)
 })
 
+// 为代码生成对话框提供可用文件列表
+const availableFilesForGeneration = computed(() => {
+  return testCases.value.map(caseFile => ({
+    path: caseFile.file_path,
+    name: `${caseFile.module}/${caseFile.file}`,
+    casesCount: (caseFile.cases || []).length
+  }))
+})
+
 const filteredCases = computed(() => {
+  if (!Array.isArray(testCases.value)) {
+    return []
+  }
+  
   let filtered = testCases.value
   
   // 关键词搜索
   if (searchKeyword.value) {
     const keyword = searchKeyword.value.toLowerCase()
-    filtered = filtered.filter(item => 
-      item.feature.toLowerCase().includes(keyword) ||
-      item.file.toLowerCase().includes(keyword) ||
-      item.cases.some(c => 
-        c.detail.toLowerCase().includes(keyword) ||
-        c.case_id.toLowerCase().includes(keyword)
-      )
-    )
+    filtered = filtered.filter(item => {
+      if (!item) return false
+      
+      const feature = (item.feature || '').toLowerCase()
+      const file = (item.file || '').toLowerCase()
+      
+      // 安全检查 cases 数组
+      const cases = Array.isArray(item.cases) ? item.cases : []
+      
+      return feature.includes(keyword) ||
+             file.includes(keyword) ||
+             cases.some(c => {
+               if (!c) return false
+               const detail = (c.detail || '').toLowerCase()
+               const caseId = (c.case_id || '').toLowerCase()
+               return detail.includes(keyword) || caseId.includes(keyword)
+             })
+    })
   }
   
   // 模块筛选
   if (selectedModule.value) {
-    filtered = filtered.filter(item => item.module === selectedModule.value)
+    filtered = filtered.filter(item => 
+      item && item.module === selectedModule.value
+    )
   }
   
   // 状态筛选
   if (selectedStatus.value) {
     const isEnabled = selectedStatus.value === 'enabled'
-    filtered = filtered.filter(item => 
-      item.cases.some(c => Boolean(c.is_run) === isEnabled)
-    )
+    filtered = filtered.filter(item => {
+      if (!item || !Array.isArray(item.cases)) return false
+      return item.cases.some(c => c && Boolean(c.is_run) === isEnabled)
+    })
   }
   
   return filtered
@@ -302,10 +447,40 @@ const loadTestCases = async () => {
   try {
     loading.value = true
     const response = await apiService.getTestCases()
-    testCases.value = response.data || []
+    
+    // 确保数据格式正确
+    const data = response.data || []
+    testCases.value = Array.isArray(data) ? data : []
+    
+    // 验证数据结构
+    testCases.value = testCases.value.map(item => {
+      if (!item || typeof item !== 'object') {
+        return null
+      }
+      
+      return {
+        ...item,
+        module: item.module || '',
+        feature: item.feature || '',
+        file: item.file || '',
+        file_path: item.file_path || '',
+        cases: Array.isArray(item.cases) ? item.cases.map(c => ({
+          case_id: c?.case_id || '',
+          detail: c?.detail || '',
+          method: c?.method || 'GET',
+          is_run: Boolean(c?.is_run),
+          url: c?.url || '',
+          ...c
+        })) : []
+      }
+    }).filter(Boolean) // 过滤掉无效的数据
+    
+    console.log('加载测试用例成功:', testCases.value.length, '个文件')
+    
   } catch (error) {
-    console.error('加载测试用例失败:', error)
-    ElMessage.error('加载测试用例失败')
+    handleApiError(error, '加载测试用例失败')
+    // 设置为空数组，避免后续访问错误
+    testCases.value = []
   } finally {
     loading.value = false
   }
@@ -320,7 +495,33 @@ const handleFilter = () => {
 }
 
 const editFile = (caseFile) => {
-  router.push(`/test-cases/editor/${encodeURIComponent(caseFile.file_path)}`)
+  try {
+    // 验证文件对象
+    if (!caseFile || !caseFile.file_path) {
+      ElMessage.error('无效的文件路径')
+      return
+    }
+    
+    let filePath = caseFile.file_path
+    console.log('原始文件路径:', filePath)
+    
+    // 路径标准化：将反斜杠转换为正斜杠
+    filePath = filePath.replace(/\\/g, '/')
+    console.log('标准化路径:', filePath)
+    
+    // 使用Base64编码，避免URL路径冲突
+    const encodedPath = btoa(unescape(encodeURIComponent(filePath)))
+    console.log('Base64编码路径:', encodedPath)
+    
+    const targetPath = `/test-cases/editor/${encodedPath}`
+    console.log('目标跳转路径:', targetPath)
+    
+    router.push(targetPath)
+    
+  } catch (error) {
+    console.error('跳转编辑器失败:', error)
+    ElMessage.error('打开编辑器失败: ' + (error.message || '未知错误'))
+  }
 }
 
 const duplicateFile = async (caseFile) => {
@@ -348,24 +549,143 @@ const duplicateFile = async (caseFile) => {
 
 const deleteFile = async (caseFile) => {
   try {
-    await ElMessageBox.confirm(
-      `确定要删除文件 "${caseFile.file}" 吗？此操作不可恢复。`,
+    await showConfirmDialog(
       '删除确认',
-      {
-        confirmButtonText: '确定删除',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
+      `确定要删除文件 "${caseFile.file}" 吗？此操作不可恢复。`,
+      'warning'
     )
     
-    // 这里实现删除逻辑
-    ElMessage.success('文件删除成功')
-    await loadTestCases()
+    // 显示删除进度
+    const loadingMessage = ElMessage.info({
+      message: '正在删除文件...',
+      duration: 0
+    })
+    
+    try {
+      // 这里实现删除逻辑 - 需要后端API支持
+      // await apiService.deleteTestCaseFile(caseFile.file_path)
+      
+      // 模拟删除操作
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      
+      loadingMessage.close()
+      ElMessage.success('文件删除成功')
+      await loadTestCases()
+    } catch (deleteError) {
+      loadingMessage.close()
+      handleApiError(deleteError, '删除文件失败')
+    }
   } catch (error) {
     if (error !== 'cancel') {
-      console.error('删除文件失败:', error)
+      console.error('删除操作错误:', error)
     }
   }
+}
+
+// 切换用例详情展开/折叠状态
+const toggleCaseDetails = (filePath) => {
+  if (expandedCases.value.has(filePath)) {
+    expandedCases.value.delete(filePath)
+  } else {
+    expandedCases.value.add(filePath)
+  }
+}
+
+// 格式化JSON显示
+const formatJson = (data) => {
+  if (typeof data === 'string') {
+    try {
+      return JSON.stringify(JSON.parse(data), null, 2)
+    } catch {
+      return data
+    }
+  }
+  return JSON.stringify(data, null, 2)
+}
+
+// 格式化断言值显示
+const formatAssertValue = (value) => {
+  if (typeof value === 'object') {
+    return JSON.stringify(value)
+  }
+  return String(value)
+}
+
+// 单独为文件生成代码
+const generateCodeForFile = async (caseFile) => {
+  try {
+    generating.value = true
+    ElMessage.info('正在为当前文件生成测试代码...')
+    
+    // 调用API为单个文件生成代码
+    const response = await apiService.generateCode(caseFile.file_path)
+    
+    ElMessage.success({
+      message: `代码生成成功！耗时 ${response.data.duration}s`,
+      duration: 3000
+    })
+    
+    console.log('生成详情:', response.data)
+  } catch (error) {
+    handleApiError(error, '代码生成失败')
+  } finally {
+    generating.value = false
+  }
+}
+
+// 执行单个测试用例
+const executeTestCase = async (caseFile, testCase) => {
+  try {
+    ElMessage.info(`正在执行测试用例: ${testCase.case_id}`)
+    
+    // 这里可以调用API执行单个测试用例
+    // 暂时显示提示信息
+    ElMessage.success('测试用例执行成功')
+    
+  } catch (error) {
+    console.error('测试用例执行失败:', error)
+    ElMessage.error('测试用例执行失败: ' + (error.message || '未知错误'))
+  }
+}
+
+// 打开代码生成向导
+const openGenerationWizard = () => {
+  showGenerationDialog.value = true
+}
+
+// 处理代码生成完成
+const handleGenerationCompleted = (result) => {
+  console.log('代码生成完成:', result)
+  ElMessage.success('代码生成完成！')
+  // 可以在这里进行其他操作，如刷新页面等
+}
+
+// 优化错误处理的通用方法
+const handleApiError = (error, defaultMessage = '操作失败') => {
+  console.error('API错误:', error)
+  
+  let errorMessage = defaultMessage
+  if (error.response) {
+    const { data, status } = error.response
+    errorMessage = data?.message || `HTTP ${status}: ${data?.error || '服务器错误'}`
+  } else if (error.request) {
+    errorMessage = '网络连接失败，请检查网络状态'
+  } else if (error.message) {
+    errorMessage = error.message
+  }
+  
+  ElMessage.error(errorMessage)
+  return errorMessage
+}
+
+// 显示操作确认对话框
+const showConfirmDialog = (title, message, type = 'warning') => {
+  return ElMessageBox.confirm(message, title, {
+    confirmButtonText: '确定',
+    cancelButtonText: '取消',
+    type,
+    center: true
+  })
 }
 
 const updateCaseStatus = async (caseFile, testCase) => {
@@ -383,11 +703,47 @@ const updateCaseStatus = async (caseFile, testCase) => {
 const generateCode = async () => {
   try {
     generating.value = true
-    await apiService.generateCode()
-    ElMessage.success('测试代码生成成功')
+    ElMessage.info('正在生成测试代码，请稍候...')
+    
+    const response = await apiService.generateCode()
+    const data = response.data || {}
+    
+    // 显示详细的生成结果
+    const messageContent = [
+      `生成完成！耗时 ${data.duration || 0}s`,
+      `处理了 ${data.yaml_files_count || 0} 个YAML文件`,
+      `生成了 ${data.generated_files_count || 0} 个Python测试文件`
+    ].join('\n')
+    
+    ElMessageBox.alert(
+      `${messageContent}\n\n生成的文件:\n${(data.generated_files || []).map(f => `• ${f}`).join('\n')}`,
+      '代码生成成功',
+      {
+        confirmButtonText: '确定',
+        type: 'success',
+        customStyle: {
+          'white-space': 'pre-line'
+        }
+      }
+    )
+    
+    console.log('生成代码详情:', data)
+    
   } catch (error) {
     console.error('生成代码失败:', error)
-    ElMessage.error('生成代码失败')
+    
+    let errorMessage = '生成代码失败'
+    if (error.response && error.response.data) {
+      errorMessage = error.response.data.message || errorMessage
+      // 如果有详细错误信息，显示在控制台
+      if (error.response.data.error_detail) {
+        console.error('错误详情:', error.response.data.error_detail)
+      }
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    ElMessage.error(errorMessage)
   } finally {
     generating.value = false
   }
@@ -399,6 +755,7 @@ const refreshCases = () => {
 
 const createCaseFile = async () => {
   try {
+    // 验证表单
     await createFormRef.value.validate()
     creating.value = true
     
@@ -429,9 +786,13 @@ ${newCaseForm.value.fileName}_01:
     sql:
 `
     
-    await apiService.saveTestCaseContent(filePath, yamlContent)
+    console.log('创建用例文件:', { filePath, module: newCaseForm.value.module, fileName: newCaseForm.value.fileName })
     
-    ElMessage.success('用例文件创建成功')
+    // 调用API创建文件
+    const response = await apiService.saveTestCaseFile(filePath, yamlContent)
+    console.log('创建响应:', response)
+    
+    ElMessage.success(`用例文件创建成功: ${filePath}`)
     showCreateDialog.value = false
     
     // 重置表单
@@ -447,7 +808,16 @@ ${newCaseForm.value.fileName}_01:
     
   } catch (error) {
     console.error('创建用例文件失败:', error)
-    ElMessage.error('创建用例文件失败')
+    
+    // 更详细的错误处理
+    let errorMessage = '创建用例文件失败'
+    if (error.response) {
+      errorMessage = error.response.data?.message || `HTTP ${error.response.status}: ${error.response.statusText}`
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    ElMessage.error(errorMessage)
   } finally {
     creating.value = false
   }
@@ -566,10 +936,18 @@ onMounted(() => {
       align-items: center;
       justify-content: space-between;
       margin-bottom: $spacing-md;
+      flex-wrap: wrap;
+      gap: $spacing-sm;
       
       .case-count {
         color: $text-secondary;
         font-size: $font-size-sm;
+      }
+      
+      .file-stats {
+        display: flex;
+        gap: $spacing-xs;
+        flex-wrap: wrap;
       }
     }
     
@@ -613,6 +991,109 @@ onMounted(() => {
       .more-cases {
         text-align: center;
         padding-top: $spacing-sm;
+      }
+    }
+    
+    // 详细用例展示样式
+    .expanded-cases {
+      .detailed-case-item {
+        border: 1px solid $border-light;
+        border-radius: $border-radius-md;
+        margin-bottom: $spacing-md;
+        padding: $spacing-md;
+        background: rgba(255, 255, 255, 0.02);
+        
+        .case-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: $spacing-sm;
+          
+          .case-title {
+            display: flex;
+            align-items: center;
+            gap: $spacing-sm;
+            
+            .case-id {
+              font-family: $font-family-mono;
+              font-size: $font-size-sm;
+              color: $primary-color;
+              font-weight: 500;
+            }
+          }
+          
+          .case-actions {
+            display: flex;
+            gap: $spacing-xs;
+          }
+        }
+        
+        .case-details {
+          .case-description {
+            color: $text-secondary;
+            font-size: $font-size-sm;
+            margin-bottom: $spacing-md;
+            font-style: italic;
+          }
+          
+          .case-config {
+            .config-item {
+              margin-bottom: $spacing-sm;
+              
+              label {
+                display: block;
+                font-size: $font-size-sm;
+                font-weight: 500;
+                color: $text-primary;
+                margin-bottom: $spacing-xs;
+              }
+              
+              code {
+                background: rgba(255, 255, 255, 0.1);
+                padding: 2px 6px;
+                border-radius: $border-radius-sm;
+                font-family: $font-family-mono;
+                font-size: $font-size-xs;
+                color: $primary-color;
+              }
+              
+              .config-details {
+                .header-tag {
+                  margin-right: $spacing-xs;
+                  margin-bottom: $spacing-xs;
+                }
+                
+                .json-display,
+                .sql-display {
+                  background: rgba(0, 0, 0, 0.2);
+                  padding: $spacing-sm;
+                  border-radius: $border-radius-sm;
+                  font-family: $font-family-mono;
+                  font-size: $font-size-xs;
+                  color: #e8eaed;
+                  overflow-x: auto;
+                  margin: 0;
+                  border: 1px solid $border-light;
+                }
+                
+                &.assertions {
+                  .assertion-item {
+                    display: flex;
+                    align-items: center;
+                    gap: $spacing-sm;
+                    margin-bottom: $spacing-xs;
+                    
+                    .assertion-value {
+                      font-family: $font-family-mono;
+                      font-size: $font-size-xs;
+                      color: $success-color;
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

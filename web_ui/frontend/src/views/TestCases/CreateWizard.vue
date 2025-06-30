@@ -2,7 +2,7 @@
   <div class="create-wizard">
     <div class="wizard-header">
       <h1 class="wizard-title gradient-text">
-        <el-icon class="title-icon"><Magic /></el-icon>
+        <el-icon class="title-icon"><MagicStick /></el-icon>
         测试用例创建向导
       </h1>
       <p class="wizard-subtitle">简单几步，快速创建高质量的API测试用例</p>
@@ -267,6 +267,29 @@
             <h3>用例创建完成！</h3>
             <p>您的测试用例已成功创建，可以选择下一步操作</p>
             
+            <!-- 显示创建的用例信息 -->
+            <div v-if="createdCaseInfo" class="case-info">
+              <el-descriptions :column="1" border size="small">
+                <el-descriptions-item label="用例名称">
+                  {{ wizardForm.name }}
+                </el-descriptions-item>
+                <el-descriptions-item label="所属模块">
+                  {{ wizardForm.module || 'default' }}
+                </el-descriptions-item>
+                <el-descriptions-item label="文件路径">
+                  {{ createdCaseInfo.file_path }}
+                </el-descriptions-item>
+                <el-descriptions-item label="请求方法">
+                  <el-tag :type="wizardForm.request.method === 'GET' ? 'success' : 'primary'">
+                    {{ wizardForm.request.method }}
+                  </el-tag>
+                </el-descriptions-item>
+                <el-descriptions-item label="请求地址">
+                  {{ wizardForm.request.url }}
+                </el-descriptions-item>
+              </el-descriptions>
+            </div>
+            
             <div class="completion-actions">
               <el-button type="primary" @click="runTest">
                 <el-icon><VideoPlay /></el-icon>
@@ -314,17 +337,22 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
+import { useRouter } from 'vue-router'
+import { apiService } from '@/services/api'
 import {
-  Magic, Plus, ArrowLeft, ArrowRight, Check, SuccessFilled,
-  VideoPlay, Edit, DocumentAdd, Monitor, DataLine, Network, Tools
+  MagicStick, Plus, ArrowLeft, ArrowRight, Check, SuccessFilled,
+  VideoPlay, Edit, DocumentAdd, Monitor, DataLine, Connection, Tools
 } from '@element-plus/icons-vue'
+
+const router = useRouter()
 
 // 响应式数据
 const currentStep = ref(0)
 const creating = ref(false)
 const bodyType = ref('json')
+const createdCaseInfo = ref(null) // 存储创建成功的用例信息
 
 // 用例类型配置
 const caseTypes = ref([
@@ -332,7 +360,7 @@ const caseTypes = ref([
     value: 'api',
     label: 'API接口测试',
     description: '测试RESTful API接口的功能和性能',
-    icon: Network,
+    icon: Connection,
     features: ['响应验证', '性能监控', '数据依赖']
   },
   {
@@ -358,10 +386,37 @@ const caseTypes = ref([
   }
 ])
 
-// 可用模块
-const availableModules = ref([
-  'Login', 'User', 'Order', 'Payment', 'Product', 'Category'
-])
+// 可用模块 - 动态获取
+const availableModules = ref([])
+
+// 获取可用模块列表
+const loadAvailableModules = async () => {
+  try {
+    // 从用例管理API获取实际模块列表
+    const response = await apiService.getTestCases()
+    const testCases = response.data || []
+    
+    // 提取唯一模块名
+    const moduleSet = new Set()
+    testCases.forEach(item => {
+      if (item && item.module) {
+        moduleSet.add(item.module)
+      }
+    })
+    
+    // 添加常用模块作为默认选项
+    const defaultModules = ['Login', 'User', 'Order', 'Payment', 'Product', 'Category']
+    defaultModules.forEach(module => moduleSet.add(module))
+    
+    availableModules.value = Array.from(moduleSet).sort()
+    console.log('加载可用模块:', availableModules.value)
+    
+  } catch (error) {
+    console.error('加载模块列表失败:', error)
+    // 降级使用默认模块
+    availableModules.value = ['Login', 'User', 'Order', 'Payment', 'Product', 'Category']
+  }
+}
 
 // 向导表单数据
 const wizardForm = ref({
@@ -461,58 +516,140 @@ const createCase = async () => {
     // 构建YAML格式的测试用例
     const testCase = buildTestCase()
     
-    // 这里调用API创建测试用例
-    await new Promise(resolve => setTimeout(resolve, 2000)) // 模拟创建
+    // 调用API创建测试用例
+    const response = await apiService.createTestCaseFile({
+      module: wizardForm.value.module || 'default',
+      case_name: wizardForm.value.name,
+      case_data: testCase
+    })
+    
+    // 保存创建的用例信息
+    createdCaseInfo.value = response.data || {
+      file_path: `${wizardForm.value.module || 'default'}/${wizardForm.value.name}.yaml`,
+      name: wizardForm.value.name
+    }
     
     ElMessage.success('测试用例创建成功！')
+    
+    // 更新模块列表，确保新模块出现在下拉框中
+    await loadAvailableModules()
+    
     currentStep.value = 4
   } catch (error) {
-    ElMessage.error('创建失败，请重试')
+    console.error('创建用例失败:', error)
+    ElMessage.error(error.message || '创建失败，请重试')
   } finally {
     creating.value = false
   }
 }
 
 const buildTestCase = () => {
-  // 构建测试用例数据结构
-  return {
-    name: wizardForm.value.name,
-    request: wizardForm.value.request,
-    validate: wizardForm.value.validate,
-    // 其他字段...
+  // 构建测试用例数据结构，符合项目YAML格式
+  const testCase = {
+    [wizardForm.value.name]: {
+      name: wizardForm.value.name,
+      base_url: '${base_url}',
+      request: {
+        url: wizardForm.value.request.url,
+        method: wizardForm.value.request.method,
+        headers: {}
+      }
+    }
   }
+  
+  // 添加请求头
+  wizardForm.value.request.headers.forEach(header => {
+    if (header.key && header.value) {
+      testCase[wizardForm.value.name].request.headers[header.key] = header.value
+    }
+  })
+  
+  // 添加请求体数据
+  if (needsBody.value) {
+    if (wizardForm.value.request.data) {
+      try {
+        testCase[wizardForm.value.name].request.json = JSON.parse(wizardForm.value.request.data)
+      } catch {
+        testCase[wizardForm.value.name].request.data = wizardForm.value.request.data
+      }
+    } else if (wizardForm.value.request.params.length > 0) {
+      const data = {}
+      wizardForm.value.request.params.forEach(param => {
+        if (param.key && param.value) {
+          data[param.key] = param.value
+        }
+      })
+      testCase[wizardForm.value.name].request.data = data
+    }
+  }
+  
+  // 添加断言
+  if (wizardForm.value.validate.length > 0) {
+    testCase[wizardForm.value.name].validate = wizardForm.value.validate.map(assertion => ({
+      jsonpath: assertion.jsonpath,
+      type: assertion.type,
+      value: assertion.value
+    }))
+  }
+  
+  return testCase
 }
 
 // 完成后的操作
 const runTest = () => {
-  ElMessage.info('正在跳转到执行中心...')
+  ElMessage.success('正在跳转到执行中心...')
   // 跳转到执行页面
+  router.push('/execution')
 }
 
 const editCase = () => {
-  ElMessage.info('正在跳转到编辑页面...')
-  // 跳转到编辑页面
-}
-
-const createAnother = () => {
-  // 重置表单，创建新用例
-  currentStep.value = 0
-  wizardForm.value = {
-    type: 'api',
-    name: '',
-    module: '',
-    priority: 'medium',
-    description: '',
-    request: {
-      method: 'POST',
-      url: '',
-      headers: [{ key: 'Content-Type', value: 'application/json' }],
-      data: '',
-      params: []
-    },
-    validate: []
+  if (createdCaseInfo.value) {
+    ElMessage.success('正在跳转到编辑页面...')
+    // 跳转到编辑页面，使用Base64编码传入用例文件路径
+    const encodedPath = btoa(unescape(encodeURIComponent(createdCaseInfo.value.file_path)))
+    router.push(`/test-cases/editor/${encodedPath}`)
+  } else {
+    ElMessage.warning('无法获取用例路径，请从用例管理页面打开编辑器')
+    router.push('/test-cases')
   }
 }
+
+const createAnother = async () => {
+  try {
+    // 重置表单，创建新用例
+    currentStep.value = 0
+    createdCaseInfo.value = null
+    wizardForm.value = {
+      type: 'api',
+      name: '',
+      module: '',
+      priority: 'medium',
+      description: '',
+      request: {
+        method: 'POST',
+        url: '',
+        headers: [{ key: 'Content-Type', value: 'application/json' }],
+        data: '',
+        params: []
+      },
+      validate: []
+    }
+    
+    // 重新加载模块列表，确保最新数据
+    await loadAvailableModules()
+    
+    ElMessage.success('已重置表单，可以创建新用例')
+  } catch (error) {
+    console.error('重置表单失败:', error)
+    ElMessage.warning('表单已重置，但模块列表更新失败')
+  }
+}
+
+// 生命周期
+onMounted(() => {
+  // 初始化时加载可用模块
+  loadAvailableModules()
+})
 </script>
 
 <style lang="scss" scoped>
@@ -704,6 +841,26 @@ const createAnother = () => {
   p {
     color: $text-secondary;
     margin-bottom: $spacing-xl;
+  }
+  
+  .case-info {
+    max-width: 600px;
+    margin: 0 auto $spacing-xl auto;
+    text-align: left;
+    
+    :deep(.el-descriptions) {
+      background: $bg-secondary;
+      border-radius: $sketch-radius;
+    }
+    
+    :deep(.el-descriptions__label) {
+      font-weight: 600;
+      color: $text-primary;
+    }
+    
+    :deep(.el-descriptions__content) {
+      color: $text-secondary;
+    }
   }
   
   .completion-actions {

@@ -22,7 +22,7 @@ Flask==2.0.3
 h11==0.13.0
 h2==4.1.0
 hpack==4.0.0
-httptools==0.4.0
+httptools
 hyperframe==6.0.1
 idna==3.3
 iniconfig==1.1.0

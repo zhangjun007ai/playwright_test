@@ -14,7 +14,7 @@ set "RESET=[0m"
 
 echo %CYAN%========================================%RESET%
 echo %CYAN%   Pytest Auto API 自动化测试框架%RESET%
-echo %CYAN%   智能一键启动脚本 v2.0%RESET%
+echo %CYAN%   智能一键启动脚本 v2.1%RESET%
 echo %CYAN%========================================%RESET%
 echo.
 
@@ -100,16 +100,20 @@ timeout /t 5 /nobreak >nul
 
 :: 检查后端服务健康状态
 echo %YELLOW%检查后端服务状态...%RESET%
-for /L %%i in (1,1,10) do (
-    curl -s http://127.0.0.1:5000/api/health >nul 2>&1
+set backend_ready=0
+for /L %%i in (1,1,15) do (
+    netstat -an | findstr ":5000" | findstr "LISTENING" >nul 2>&1
     if !errorlevel! equ 0 (
-        echo %GREEN%✅ 后端服务启动成功%RESET%
+        echo %GREEN%✅ 后端服务启动成功 ^(端口5000已监听^)%RESET%
+        set backend_ready=1
         goto backend_ok
     )
-    echo %YELLOW%等待后端服务响应... ^(%%i/10^)%RESET%
+    echo %YELLOW%等待后端服务响应... ^(%%i/15^)%RESET%
     timeout /t 2 /nobreak >nul
 )
-echo %YELLOW%⚠ 无法确认后端服务状态，但继续启动前端...%RESET%
+if !backend_ready! equ 0 (
+    echo %YELLOW%⚠ 后端服务启动较慢，继续启动前端...%RESET%
+)
 
 :backend_ok
 echo.
@@ -121,16 +125,33 @@ cd web_ui\frontend
 start "Pytest API 前端界面" cmd /c "echo %MAGENTA%Pytest Auto API 前端界面%RESET% && echo %CYAN%访问地址: http://127.0.0.1:5173%RESET% && echo %YELLOW%按Ctrl+C可停止服务%RESET% && echo. && npm run dev"
 cd ..\..
 
-:: 等待前端服务启动
+:: 等待前端服务启动并检测
 echo %YELLOW%等待前端服务启动...%RESET%
-timeout /t 8 /nobreak >nul
+set frontend_ready=0
+for /L %%i in (1,1,20) do (
+    netstat -an | findstr ":5173" | findstr "LISTENING" >nul 2>&1
+    if !errorlevel! equ 0 (
+        echo %GREEN%✅ 前端服务启动成功 ^(端口5173已监听^)%RESET%
+        set frontend_ready=1
+        goto frontend_ok
+    )
+    echo %YELLOW%等待前端服务响应... ^(%%i/20^)%RESET%
+    timeout /t 2 /nobreak >nul
+)
 
+:frontend_ok
 :: 启动完成
 echo %BLUE%[6/6] 服务启动完成！%RESET%
 echo.
-echo %GREEN%========================================%RESET%
-echo %GREEN%   🎉 所有服务启动成功！%RESET%
-echo %GREEN%========================================%RESET%
+if !frontend_ready! equ 1 (
+    echo %GREEN%========================================%RESET%
+    echo %GREEN%   🎉 所有服务启动成功！%RESET%
+    echo %GREEN%========================================%RESET%
+) else (
+    echo %YELLOW%========================================%RESET%
+    echo %YELLOW%   ⚠ 前端服务启动较慢，请稍等...%RESET%
+    echo %YELLOW%========================================%RESET%
+)
 echo.
 echo %CYAN%📡 服务地址:%RESET%
 echo %WHITE%   后端API: %YELLOW%http://127.0.0.1:5000%RESET%
@@ -148,11 +169,19 @@ echo %WHITE%   • 在各服务窗口按Ctrl+C可停止对应服务%RESET%
 echo %WHITE%   • 如遇问题请查看各服务窗口的错误信息%RESET%
 echo.
 
-:: 询问是否自动打开浏览器
-echo %CYAN%是否自动打开浏览器访问Web界面？%RESET%
-echo %WHITE%按任意键打开浏览器，或等待10秒后自动打开...%RESET%
-timeout /t 10 >nul
-start http://127.0.0.1:5173
+:: 自动打开浏览器
+if !frontend_ready! equ 1 (
+    echo %GREEN%🌐 前端服务已就绪，正在自动打开浏览器...%RESET%
+    timeout /t 3 /nobreak >nul
+    start http://127.0.0.1:5173
+    echo %GREEN%✅ 浏览器已打开，访问地址: http://127.0.0.1:5173%RESET%
+) else (
+    echo %YELLOW%⚠ 前端服务仍在启动中，请手动访问: http://127.0.0.1:5173%RESET%
+    echo %CYAN%是否现在打开浏览器？ ^(将在10秒后自动打开^)%RESET%
+    timeout /t 10 >nul
+    start http://127.0.0.1:5173
+    echo %YELLOW%📖 如网页无法加载，请等待1-2分钟后刷新页面%RESET%
+)
 
 echo.
 echo %GREEN%🌟 欢迎使用 Pytest Auto API 自动化测试框架！%RESET%

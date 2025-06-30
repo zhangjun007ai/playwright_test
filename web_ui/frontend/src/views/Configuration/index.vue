@@ -178,8 +178,8 @@
                     <span class="env-host">{{ env.host }}</span>
                   </div>
                   <div class="env-actions">
-                    <el-button type="text" size="small" @click="editEnvironment(env)">编辑</el-button>
-                    <el-button type="text" size="small" @click="deleteEnvironment(env.name)">删除</el-button>
+                                    <el-button type="link" size="small" @click="editEnvironment(env)">编辑</el-button>
+                <el-button type="link" size="small" @click="deleteEnvironment(env.name)">删除</el-button>
                   </div>
                 </div>
               </div>

@@ -13,14 +13,18 @@
       <div class="stats-grid">
         <div class="stat-card sketch-card" v-for="stat in stats" :key="stat.key">
           <div class="stat-icon" :style="{ color: stat.color }">
-            <el-icon :size="32"><component :is="stat.icon" /></el-icon>
+            <el-icon :size="32">
+              <component :is="stat.icon" />
+            </el-icon>
           </div>
           <div class="stat-content">
             <div class="stat-value">{{ stat.value }}</div>
             <div class="stat-label">{{ stat.label }}</div>
           </div>
           <div class="stat-trend" :class="stat.trend">
-            <el-icon><component :is="stat.trendIcon" /></el-icon>
+            <el-icon>
+              <component :is="stat.trendIcon" />
+            </el-icon>
             <span>{{ stat.change }}</span>
           </div>
         </div>
@@ -157,40 +161,40 @@ const stats = ref([
     key: 'total_cases',
     label: '总用例数',
     value: '156',
-    icon: 'Document',
+    icon: Document,
     color: '#667eea',
     trend: 'up',
-    trendIcon: 'ArrowUp',
+    trendIcon: ArrowUp,
     change: '+12'
   },
   {
     key: 'success_rate',
     label: '成功率',
     value: '87.5%',
-    icon: 'SuccessFilled',
+    icon: SuccessFilled,
     color: '#00d4aa',
     trend: 'up',
-    trendIcon: 'ArrowUp',
+    trendIcon: ArrowUp,
     change: '+2.3%'
   },
   {
     key: 'total_executions',
     label: '总执行次数',
     value: '1,234',
-    icon: 'VideoPlay',
+    icon: VideoPlay,
     color: '#4facfe',
     trend: 'up',
-    trendIcon: 'ArrowUp',
+    trendIcon: ArrowUp,
     change: '+45'
   },
   {
     key: 'avg_duration',
     label: '平均耗时',
     value: '2.3s',
-    icon: 'Timer',
+    icon: Timer,
     color: '#ffb74d',
     trend: 'down',
-    trendIcon: 'ArrowDown',
+    trendIcon: ArrowDown,
     change: '-0.5s'
   }
 ])

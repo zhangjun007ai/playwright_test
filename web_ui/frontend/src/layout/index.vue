@@ -60,7 +60,9 @@
             :index="route.path"
             class="menu-item"
           >
-            <el-icon><component :is="route.meta.icon" /></el-icon>
+            <el-icon>
+              <component :is="route.iconComponent" />
+            </el-icon>
             <template #title>{{ route.meta.title }}</template>
           </el-menu-item>
         </el-menu>
@@ -168,6 +170,10 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useConfigStore } from '@/stores/config'
+import {
+  Expand, Fold, Connection, User, InfoFilled, Refresh,
+  DataAnalysis, Document, VideoPlay, PieChart, Setting, Tools
+} from '@element-plus/icons-vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -182,11 +188,25 @@ const isOnline = ref(false)
 const config = computed(() => configStore.config)
 const currentRoute = computed(() => route)
 
+// 图标映射
+const iconMap = {
+  'DataAnalysis': DataAnalysis,
+  'Document': Document,
+  'VideoPlay': VideoPlay,
+  'PieChart': PieChart,
+  'Setting': Setting,
+  'Tools': Tools
+}
+
 // 菜单路由（过滤掉隐藏的路由）
 const menuRoutes = computed(() => {
   return router.getRoutes()
     .filter(route => route.path !== '/' && !route.meta?.hidden)
     .filter(route => route.meta?.title)
+    .map(route => ({
+      ...route,
+      iconComponent: iconMap[route.meta?.icon] || Document
+    }))
 })
 
 // 方法

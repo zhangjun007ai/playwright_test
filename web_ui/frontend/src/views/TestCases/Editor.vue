@@ -62,7 +62,7 @@
       
       <!-- 右侧面板 -->
       <div class="right-panel" v-if="!isFullscreen">
-        <el-tabs v-model="activeRightTab" class="right-tabs">
+        <el-tabs v-model="activeRightTab" class="right-tabs" type="border-card">
           <!-- 用例预览 -->
           <el-tab-pane label="用例预览" name="preview">
             <div class="preview-section">
@@ -154,10 +154,75 @@
                 </div>
                 <div class="helper-buttons">
                   <el-button-group size="small">
+                    <el-button @click="insertTemplate('put')">PUT请求</el-button>
+                    <el-button @click="insertTemplate('delete')">DELETE请求</el-button>
+                    <el-button @click="insertTemplate('patch')">PATCH请求</el-button>
+                  </el-button-group>
+                </div>
+                <div class="helper-buttons">
+                  <el-button-group size="small">
                     <el-button @click="insertTemplate('dependency')">添加依赖</el-button>
                     <el-button @click="insertTemplate('assert')">添加断言</el-button>
                     <el-button @click="insertTemplate('sql')">SQL断言</el-button>
                   </el-button-group>
+                </div>
+                <div class="helper-buttons">
+                  <el-button-group size="small">
+                    <el-button @click="insertTemplate('complex_assert')">复杂断言</el-button>
+                    <el-button @click="insertTemplate('data_extract')">数据提取</el-button>
+                    <el-button @click="insertTemplate('complete_case')">完整用例</el-button>
+                  </el-button-group>
+                </div>
+              </div>
+
+              <div class="helper-section">
+                <h4>智能提示</h4>
+                <div class="smart-hints">
+                  <el-alert
+                    title="YAML编写提示"
+                    type="info"
+                    :closable="false"
+                    show-icon
+                  >
+                    <template #default>
+                      <ul class="hint-list">
+                        <li>• 使用2个空格进行缩进，不要使用Tab</li>
+                        <li>• 字符串值包含特殊字符时需要用引号包围</li>
+                        <li>• 使用 ${{host()}} 引用全局配置的host地址</li>
+                        <li>• JSONPath语法: $.data.code 获取响应中的code字段</li>
+                        <li>• 依赖用例的数据缓存: $json(cache_name)$ 引用</li>
+                      </ul>
+                    </template>
+                  </el-alert>
+                </div>
+              </div>
+
+              <div class="helper-section">
+                <h4>常用片段</h4>
+                <div class="snippet-list">
+                  <el-collapse accordion>
+                    <el-collapse-item title="请求头配置" name="headers">
+                      <div class="snippet-item">
+                        <el-button size="small" @click="insertSnippet('auth_header')">Authorization</el-button>
+                        <el-button size="small" @click="insertSnippet('content_json')">Content-Type JSON</el-button>
+                        <el-button size="small" @click="insertSnippet('content_form')">Content-Type Form</el-button>
+                      </div>
+                    </el-collapse-item>
+                    <el-collapse-item title="断言类型" name="assertions">
+                      <div class="snippet-item">
+                        <el-button size="small" @click="insertSnippet('status_assert')">状态码断言</el-button>
+                        <el-button size="small" @click="insertSnippet('response_time')">响应时间断言</el-button>
+                        <el-button size="small" @click="insertSnippet('json_schema')">JSON结构断言</el-button>
+                      </div>
+                    </el-collapse-item>
+                    <el-collapse-item title="数据类型" name="data_types">
+                      <div class="snippet-item">
+                        <el-button size="small" @click="insertSnippet('login_data')">登录参数</el-button>
+                        <el-button size="small" @click="insertSnippet('pagination_data')">分页参数</el-button>
+                        <el-button size="small" @click="insertSnippet('upload_data')">文件上传</el-button>
+                      </div>
+                    </el-collapse-item>
+                  </el-collapse>
                 </div>
               </div>
 
@@ -395,11 +460,63 @@ const dependencies = ref([])
 const assertions = ref([])
 
 // 计算属性
-const filePath = computed(() => route.params.path)
+const filePath = computed(() => {
+  const path = route.params.path
+  console.log('Editor接收到的路径参数:', path)
+  
+  if (!path || typeof path !== 'string') {
+    console.warn('无效的路径参数')
+    return ''
+  }
+  
+  try {
+    // 判断是否为Base64编码的路径
+    // Base64字符串只包含字母、数字、+、/、= 字符
+    const base64Regex = /^[A-Za-z0-9+/]+=*$/
+    
+    if (base64Regex.test(path)) {
+      // Base64解码
+      try {
+        const decodedPath = decodeURIComponent(escape(atob(path)))
+        console.log('Base64解码成功:', path, '->', decodedPath)
+        
+        // 路径标准化：确保使用正斜杠
+        const normalizedPath = decodedPath.replace(/\\/g, '/')
+        console.log('标准化后路径:', normalizedPath)
+        
+        return normalizedPath
+      } catch (base64Error) {
+        console.warn('Base64解码失败，尝试URL解码:', base64Error)
+        // 如果Base64解码失败，尝试URL解码
+        const urlDecodedPath = decodeURIComponent(path)
+        return urlDecodedPath.replace(/\\/g, '/')
+      }
+    } else {
+      // 兼容旧的URL编码方式
+      console.log('检测为URL编码，使用URL解码:', path)
+      const urlDecodedPath = decodeURIComponent(path)
+      const normalizedPath = urlDecodedPath.replace(/\\/g, '/')
+      console.log('URL解码并标准化后:', normalizedPath)
+      return normalizedPath
+    }
+  } catch (error) {
+    console.warn('路径解码失败:', error)
+    // 返回原始路径，进行基本的路径标准化
+    return String(path).replace(/\\/g, '/')
+  }
+})
+
 const fileName = computed(() => {
-  if (!filePath.value) return ''
-  const parts = filePath.value.split('/')
-  return parts[parts.length - 1]
+  const path = filePath.value
+  if (!path || typeof path !== 'string') return ''
+  
+  try {
+    const parts = path.split('/')
+    return parts[parts.length - 1] || ''
+  } catch (error) {
+    console.warn('文件名解析失败:', error)
+    return ''
+  }
 })
 
 const hasContent = computed(() => content.value.trim().length > 0)
@@ -411,21 +528,35 @@ const editorHeight = computed(() => {
 
 const extensions = computed(() => {
   const exts = [yaml()]
-  if (isDark.value) {
-    exts.push(oneDark)
-  }
+  // 可以根据用户设置或系统主题切换暗色模式
+  // if (isDark.value) {
+  //   exts.push(oneDark)
+  // }
   exts.push(EditorView.lineWrapping)
   return exts
 })
 
 const testCases = computed(() => {
-  if (!parsedData.value) return {}
-  const cases = { ...parsedData.value }
-  delete cases.case_common
-  return cases
+  if (!parsedData.value || typeof parsedData.value !== 'object') return {}
+  
+  try {
+    const cases = { ...parsedData.value }
+    delete cases.case_common
+    return cases
+  } catch (error) {
+    console.warn('提取测试用例失败:', error)
+    return {}
+  }
 })
 
-const caseCount = computed(() => Object.keys(testCases.value).length)
+const caseCount = computed(() => {
+  try {
+    return Object.keys(testCases.value || {}).length
+  } catch (error) {
+    console.warn('计算用例数量失败:', error)
+    return 0
+  }
+})
 
 const yamlStructure = computed(() => [
   {
@@ -461,18 +592,43 @@ watch([dependencies, assertions], () => {
 
 // 方法
 const goBack = () => {
-  if (hasChanges.value) {
-    showSaveDialog.value = true
-  } else {
-    router.push('/test-cases')
+  try {
+    console.log('返回用例管理页面...')
+    
+    if (hasChanges.value) {
+      // 有未保存的更改，显示保存对话框
+      showSaveDialog.value = true
+    } else {
+      // 直接返回用例管理页面
+      router.push('/test-cases').catch(err => {
+        console.warn('路由跳转警告:', err)
+        // 即使路由跳转失败，也尝试强制跳转
+        window.location.href = '/test-cases'
+      })
+    }
+  } catch (error) {
+    console.error('返回操作失败:', error)
+    ElMessage.error('返回失败，请刷新页面')
+    
+    // 降级方案：直接使用window.location
+    try {
+      window.location.href = '/test-cases'
+    } catch (fallbackError) {
+      console.error('降级跳转也失败:', fallbackError)
+      ElMessage.error('页面跳转失败，请手动导航到用例管理页面')
+    }
   }
 }
 
 const loadFile = async () => {
   try {
-    if (!filePath.value) return
+    const path = filePath.value
+    if (!path || typeof path !== 'string') {
+      console.warn('无效的文件路径:', path)
+      return
+    }
     
-    const response = await apiService.getTestCaseFile(filePath.value)
+    const response = await apiService.getTestCaseFile(path)
     content.value = response.data || ''
     originalContent.value = content.value
     
@@ -481,7 +637,15 @@ const loadFile = async () => {
     
   } catch (error) {
     console.error('加载文件失败:', error)
-    ElMessage.error('加载文件失败')
+    
+    let errorMessage = '加载文件失败'
+    if (error.response) {
+      errorMessage = error.response.data?.message || `HTTP ${error.response.status}: ${error.response.statusText}`
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    ElMessage.error(errorMessage)
   }
 }
 
@@ -489,13 +653,26 @@ const saveFile = async () => {
   try {
     saving.value = true
     
-    await apiService.saveTestCaseFile(filePath.value, content.value)
+    const path = filePath.value
+    if (!path || typeof path !== 'string') {
+      throw new Error('无效的文件路径')
+    }
+    
+    await apiService.saveTestCaseFile(path, content.value)
     originalContent.value = content.value
     
     ElMessage.success('保存成功')
   } catch (error) {
     console.error('保存失败:', error)
-    ElMessage.error('保存失败')
+    
+    let errorMessage = '保存失败'
+    if (error.response) {
+      errorMessage = error.response.data?.message || `HTTP ${error.response.status}: ${error.response.statusText}`
+    } else if (error.message) {
+      errorMessage = error.message
+    }
+    
+    ElMessage.error(errorMessage)
   } finally {
     saving.value = false
   }
@@ -558,45 +735,60 @@ const parseYamlContent = () => {
 }
 
 const extractConfigFromYaml = (parsed) => {
-  // 提取依赖配置
-  dependencies.value = []
-  assertions.value = []
-  
-  Object.keys(parsed || {}).forEach(key => {
-    if (key === 'case_common') return
+  try {
+    // 重置配置
+    dependencies.value = []
+    assertions.value = []
     
-    const caseData = parsed[key]
+    if (!parsed || typeof parsed !== 'object') {
+      return
+    }
     
-    // 提取依赖
-    if (caseData.dependence_case_data) {
-      caseData.dependence_case_data.forEach(dep => {
-        if (dep.dependent_data) {
-          dep.dependent_data.forEach(data => {
-            dependencies.value.push({
-              case_id: dep.case_id,
-              type: data.dependent_type,
-              jsonpath: data.jsonpath,
-              cache_name: data.set_cache
+    Object.keys(parsed).forEach(key => {
+      if (key === 'case_common') return
+      
+      const caseData = parsed[key]
+      if (!caseData || typeof caseData !== 'object') return
+      
+      // 提取依赖
+      if (Array.isArray(caseData.dependence_case_data)) {
+        caseData.dependence_case_data.forEach(dep => {
+          if (dep && Array.isArray(dep.dependent_data)) {
+            dep.dependent_data.forEach(data => {
+              if (data && typeof data === 'object') {
+                dependencies.value.push({
+                  case_id: dep.case_id || '',
+                  type: data.dependent_type || '',
+                  jsonpath: data.jsonpath || '',
+                  cache_name: data.set_cache || ''
+                })
+              }
             })
-          })
-        }
-      })
-    }
-    
-    // 提取断言
-    if (caseData.assert) {
-      Object.keys(caseData.assert).forEach(field => {
-        const assert = caseData.assert[field]
-        assertions.value.push({
-          field,
-          jsonpath: assert.jsonpath,
-          type: assert.type,
-          value: assert.value,
-          assertType: assert.AssertType || ''
+          }
         })
-      })
-    }
-  })
+      }
+      
+      // 提取断言
+      if (caseData.assert && typeof caseData.assert === 'object') {
+        Object.keys(caseData.assert).forEach(field => {
+          const assert = caseData.assert[field]
+          if (assert && typeof assert === 'object') {
+            assertions.value.push({
+              field: field || '',
+              jsonpath: assert.jsonpath || '',
+              type: assert.type || '',
+              value: assert.value || '',
+              assertType: assert.AssertType || ''
+            })
+          }
+        })
+      }
+    })
+  } catch (error) {
+    console.warn('提取YAML配置失败:', error)
+    dependencies.value = []
+    assertions.value = []
+  }
 }
 
 const syncConfigToYaml = () => {
@@ -606,6 +798,26 @@ const syncConfigToYaml = () => {
 
 const handleContentChange = () => {
   parseYamlContent()
+  // 实时验证YAML语法
+  validateYamlRealtime()
+}
+
+// 实时YAML验证（不显示消息提示）
+const validateYamlRealtime = () => {
+  try {
+    if (!content.value.trim()) {
+      parseError.value = ''
+      return
+    }
+    
+    const parsed = yamlParser.load(content.value)
+    parseError.value = ''
+    
+    // 可以在这里添加更多的实时验证逻辑
+    
+  } catch (error) {
+    parseError.value = `语法错误: ${error.message}`
+  }
 }
 
 const handleEditorReady = () => {
@@ -618,20 +830,75 @@ const refreshPreview = () => {
 
 const formatCode = () => {
   try {
+    if (!content.value.trim()) {
+      ElMessage.warning('请先输入YAML内容')
+      return
+    }
+    
     const parsed = yamlParser.load(content.value)
-    content.value = yamlParser.dump(parsed, { indent: 2 })
-    ElMessage.success('格式化成功')
+    if (!parsed) {
+      ElMessage.warning('YAML内容为空，无法格式化')
+      return
+    }
+    
+    const formatted = yamlParser.dump(parsed, { 
+      indent: 2, 
+      defaultFlowStyle: false,
+      allowUnicode: true 
+    })
+    
+    content.value = formatted
+    ElMessage.success('代码格式化成功')
   } catch (error) {
-    ElMessage.error('格式化失败: ' + error.message)
+    console.error('格式化失败:', error)
+    const errorMessage = error.message || '未知错误'
+    ElMessage.error(`格式化失败: ${errorMessage}`)
   }
 }
 
 const validateYaml = () => {
   try {
-    yamlParser.load(content.value)
-    ElMessage.success('YAML格式正确')
+    if (!content.value.trim()) {
+      ElMessage.warning('请先输入YAML内容')
+      return
+    }
+    
+    const parsed = yamlParser.load(content.value)
+    
+    if (!parsed) {
+      ElMessage.warning('YAML内容为空')
+      return
+    }
+    
+    // 进行更详细的结构验证
+    let hasTestCases = false
+    Object.keys(parsed).forEach(key => {
+      if (key !== 'case_common') {
+        hasTestCases = true
+      }
+    })
+    
+    if (!hasTestCases) {
+      ElMessage.warning('未找到有效的测试用例，请检查YAML结构')
+      return
+    }
+    
+    ElMessage.success('YAML格式正确，结构验证通过')
   } catch (error) {
-    ElMessage.error('YAML格式错误: ' + error.message)
+    console.error('YAML验证失败:', error)
+    const errorMessage = error.message || '未知错误'
+    
+    // 提供更友好的错误提示
+    let friendlyMessage = errorMessage
+    if (errorMessage.includes('duplicated mapping key')) {
+      friendlyMessage = '检测到重复的键名，请检查YAML结构'
+    } else if (errorMessage.includes('bad indentation')) {
+      friendlyMessage = '缩进格式错误，请检查YAML缩进'
+    } else if (errorMessage.includes('expected')) {
+      friendlyMessage = 'YAML语法错误，请检查括号、引号等符号'
+    }
+    
+    ElMessage.error(`YAML验证失败: ${friendlyMessage}`)
   }
 }
 
@@ -701,6 +968,70 @@ case_common:
   sql:
 
 `,
+    put: `test_case_01:
+  host: \${{host()}}
+  url: /api/example/1
+  method: PUT
+  detail: PUT请求示例
+  headers:
+    Content-Type: application/json
+  requestType: json
+  is_run: true
+  data:
+    id: 1
+    name: updated_example
+  dependence_case: false
+  assert:
+    code:
+      jsonpath: $.code
+      type: ==
+      value: 200
+      AssertType:
+  sql:
+
+`,
+    delete: `test_case_01:
+  host: \${{host()}}
+  url: /api/example/1
+  method: DELETE
+  detail: DELETE请求示例
+  headers:
+    Content-Type: application/json
+  requestType: params
+  is_run: true
+  data:
+    id: 1
+  dependence_case: false
+  assert:
+    code:
+      jsonpath: $.code
+      type: ==
+      value: 200
+      AssertType:
+  sql:
+
+`,
+    patch: `test_case_01:
+  host: \${{host()}}
+  url: /api/example/1
+  method: PATCH
+  detail: PATCH请求示例
+  headers:
+    Content-Type: application/json
+  requestType: json
+  is_run: true
+  data:
+    name: patched_example
+  dependence_case: false
+  assert:
+    code:
+      jsonpath: $.code
+      type: ==
+      value: 200
+      AssertType:
+  sql:
+
+`,
     dependency: `  dependence_case: true
   dependence_case_data:
     - case_id: previous_case_id
@@ -721,6 +1052,84 @@ case_common:
       value: success
       AssertType:
 `,
+    complex_assert: `  assert:
+    status_code:
+      jsonpath: $.status_code
+      type: ==
+      value: 200
+      AssertType:
+    response_time:
+      jsonpath: $.response_time
+      type: <
+      value: 1000
+      AssertType: response_time
+    data_count:
+      jsonpath: $.data.length
+      type: >
+      value: 0
+      AssertType:
+    user_name:
+      jsonpath: $.data.user.name
+      type: !=
+      value: null
+      AssertType:
+`,
+    data_extract: `  dependence_case: true
+  dependence_case_data:
+    - case_id: previous_case_id
+      dependent_data:
+        - dependent_type: response
+          jsonpath: $.data.user_id
+          set_cache: current_user_id
+        - dependent_type: response
+          jsonpath: $.data.token
+          set_cache: auth_token
+`,
+    complete_case: `test_complete_example:
+  host: \${{host()}}
+  url: /api/user/profile
+  method: POST
+  detail: 完整用例示例 - 用户资料更新
+  headers:
+    Content-Type: application/json
+    Authorization: Bearer \$json(auth_token)\$
+  requestType: json
+  is_run: true
+  data:
+    user_id: \$json(current_user_id)\$
+    name: "新用户名"
+    email: "user@example.com"
+    phone: "13800138000"
+  dependence_case: true
+  dependence_case_data:
+    - case_id: login_case
+      dependent_data:
+        - dependent_type: response
+          jsonpath: $.data.user_id
+          set_cache: current_user_id
+        - dependent_type: response
+          jsonpath: $.data.access_token
+          set_cache: auth_token
+  assert:
+    status_code:
+      jsonpath: $.code
+      type: ==
+      value: 200
+      AssertType:
+    success_message:
+      jsonpath: $.message
+      type: ==
+      value: "更新成功"
+      AssertType:
+    updated_name:
+      jsonpath: $.data.name
+      type: ==
+      value: "新用户名"
+      AssertType:
+  sql:
+    - SELECT * FROM users WHERE id = \$json(current_user_id)\$ AND name = '新用户名'
+
+`,
     sql: `  sql:
     - SELECT * FROM users WHERE id = \$json($.data.id)\$
 `
@@ -736,8 +1145,109 @@ case_common:
 }
 
 const handleStructureClick = (data) => {
-  // 点击结构树节点的处理
-  console.log('点击结构节点:', data.label)
+  try {
+    if (!data || !data.label) {
+      console.warn('无效的结构节点数据:', data)
+      return
+    }
+    
+    console.log('点击结构节点:', data.label)
+    
+    // 根据点击的节点类型插入对应的模板代码
+    const nodeTemplates = {
+      'case_common (公共配置)': 'common',
+      'test_case_01 (测试用例)': 'post',
+      'host': () => insertAtCursor('host: ${{host()}}'),
+      'url': () => insertAtCursor('url: /api/example'),
+      'method': () => insertAtCursor('method: POST'),
+      'headers': () => insertAtCursor('headers:\n  Content-Type: application/json'),
+      'data': () => insertAtCursor('data:\n  key: value'),
+      'dependence_case_data': 'dependency',
+      'assert': 'assert',
+      'sql': 'sql'
+    }
+    
+    const template = nodeTemplates[data.label]
+    if (typeof template === 'string') {
+      insertTemplate(template)
+    } else if (typeof template === 'function') {
+      template()
+    } else {
+      ElMessage.info(`点击了: ${data.label}`)
+    }
+  } catch (error) {
+    console.error('处理结构节点点击失败:', error)
+    ElMessage.error('操作失败，请重试')
+  }
+}
+
+const insertAtCursor = (text) => {
+  try {
+    const currentContent = content.value
+    // 简单的在末尾插入，实际项目中可以实现光标位置插入
+    content.value = currentContent + (currentContent && !currentContent.endsWith('\n') ? '\n' : '') + text + '\n'
+    ElMessage.success('已插入代码片段')
+  } catch (error) {
+    console.error('插入代码片段失败:', error)
+    ElMessage.error('插入失败')
+  }
+}
+
+// 插入常用代码片段
+const insertSnippet = (type) => {
+  const snippets = {
+    // 请求头配置
+    auth_header: `  headers:
+    Authorization: Bearer \$json(auth_token)\$`,
+    content_json: `  headers:
+    Content-Type: application/json`,
+    content_form: `  headers:
+    Content-Type: application/x-www-form-urlencoded`,
+    
+    // 断言类型
+    status_assert: `    status_code:
+      jsonpath: $.code
+      type: ==
+      value: 200
+      AssertType:`,
+    response_time: `    response_time:
+      jsonpath: $.response_time
+      type: <
+      value: 1000
+      AssertType: response_time`,
+    json_schema: `    data_structure:
+      jsonpath: $.data
+      type: json_schema
+      value: |
+        {
+          "type": "object",
+          "properties": {
+            "id": {"type": "number"},
+            "name": {"type": "string"}
+          },
+          "required": ["id", "name"]
+        }
+      AssertType:`,
+    
+    // 数据类型
+    login_data: `  data:
+    username: "admin"
+    password: "123456"
+    remember: true`,
+    pagination_data: `  data:
+    page: 1
+    size: 10
+    sort: "id"
+    order: "desc"`,
+    upload_data: `  data:
+    file: "@/path/to/file.jpg"
+    description: "文件描述"
+    category: "image"`
+  }
+  
+  if (snippets[type]) {
+    insertAtCursor(snippets[type])
+  }
 }
 
 const addDependency = () => {
@@ -768,23 +1278,74 @@ const removeAssertion = (index) => {
 }
 
 const confirmSave = async () => {
-  await saveFile()
-  showSaveDialog.value = false
-  router.push('/test-cases')
+  try {
+    await saveFile()
+    showSaveDialog.value = false
+    
+    // 保存成功后返回列表页
+    router.push('/test-cases').catch(err => {
+      console.warn('保存后路由跳转警告:', err)
+      window.location.href = '/test-cases'
+    })
+  } catch (error) {
+    console.error('保存失败:', error)
+    // 不关闭对话框，让用户重试
+    ElMessage.error('保存失败，请重试')
+  }
 }
 
 const discardChanges = () => {
-  showSaveDialog.value = false
-  router.push('/test-cases')
+  try {
+    showSaveDialog.value = false
+    
+    // 放弃更改并返回列表页
+    router.push('/test-cases').catch(err => {
+      console.warn('放弃更改后路由跳转警告:', err)
+      window.location.href = '/test-cases'
+    })
+  } catch (error) {
+    console.error('放弃更改失败:', error)
+    ElMessage.error('操作失败，请刷新页面')
+    
+    // 降级方案
+    try {
+      window.location.href = '/test-cases'
+    } catch (fallbackError) {
+      console.error('降级跳转也失败:', fallbackError)
+    }
+  }
 }
 
+// 监听路由参数变化
+watch(() => route.params.path, (newPath, oldPath) => {
+  if (newPath !== oldPath) {
+    loadFile()
+  }
+}, { immediate: false })
+
 // 生命周期
-onMounted(() => {
-  loadFile()
+onMounted(async () => {
+  try {
+    // 验证路由参数
+    if (!route.params.path) {
+      ElMessage.error('缺少文件路径参数')
+      router.push('/test-cases')
+      return
+    }
+    
+    await loadFile()
+  } catch (error) {
+    console.error('组件初始化失败:', error)
+    ElMessage.error('页面加载失败')
+  }
 })
 
 onBeforeUnmount(() => {
   // 清理工作
+  if (hasChanges.value) {
+    // 可以在这里保存草稿或提示用户
+    console.log('页面关闭时有未保存的更改')
+  }
 })
 </script>
 
@@ -915,6 +1476,46 @@ onBeforeUnmount(() => {
           background: rgba(102, 126, 234, 0.1);
         }
       }
+    }
+  }
+  
+  // 智能提示样式
+  .smart-hints {
+    .hint-list {
+      margin: 0;
+      padding-left: $spacing-md;
+      list-style: none;
+      
+      li {
+        margin-bottom: $spacing-xs;
+        color: $text-secondary;
+        font-size: $font-size-sm;
+        line-height: 1.5;
+      }
+    }
+  }
+  
+  // 常用片段样式
+  .snippet-list {
+    .snippet-item {
+      display: flex;
+      flex-wrap: wrap;
+      gap: $spacing-xs;
+      padding: $spacing-sm 0;
+      
+      .el-button {
+        margin-bottom: $spacing-xs;
+      }
+    }
+    
+    :deep(.el-collapse-item__header) {
+      font-size: $font-size-sm;
+      font-weight: 500;
+      color: $text-primary;
+    }
+    
+    :deep(.el-collapse-item__content) {
+      padding-bottom: $spacing-sm;
     }
   }
 }

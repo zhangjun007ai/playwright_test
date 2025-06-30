@@ -32,8 +32,12 @@ CORS(app)  # 允许跨域请求
 test_execution_status = {
     'running': False,
     'logs': [],
-    'results': None
+    'results': None,
+    'process': None  # 添加进程引用
 }
+
+# 添加执行历史存储
+execution_history = []
 
 @app.route('/api/health', methods=['GET'])
 def health_check():
@@ -231,30 +235,124 @@ def save_test_case_content(file_path):
 def generate_test_code():
     """生成测试代码"""
     try:
+        import time
+        from utils.read_files_tools.get_all_files_path import get_all_files
+        
+        # 获取所有YAML文件
+        yaml_files = get_all_files(file_path=ensure_path_sep("\\data"), yaml_data_switch=True)
+        
+        # 过滤掉代理文件
+        valid_files = [f for f in yaml_files if 'proxy_data.yaml' not in f]
+        
+        if not valid_files:
+            return jsonify({
+                'code': 400,
+                'message': '未找到有效的测试用例文件，请先创建测试用例'
+            }), 400
+        
+        # 记录开始时间
+        start_time = time.time()
+        
         # 调用代码生成器
         generator = TestCaseAutomaticGeneration()
         generator.get_case_automatic()
         
+        # 计算耗时
+        end_time = time.time()
+        duration = round(end_time - start_time, 2)
+        
+        # 检查生成的test_case目录
+        test_case_dir = project_root / 'test_case'
+        generated_files = []
+        
+        if test_case_dir.exists():
+            for py_file in test_case_dir.rglob('*.py'):
+                if py_file.is_file():
+                    generated_files.append(str(py_file.relative_to(project_root)))
+        
         return jsonify({
             'code': 200,
-            'message': '测试代码生成成功'
+            'message': '测试代码生成成功',
+            'data': {
+                'duration': duration,
+                'yaml_files_count': len(valid_files),
+                'generated_files_count': len(generated_files),
+                'yaml_files': [str(Path(f).relative_to(project_root)) for f in valid_files],
+                'generated_files': generated_files
+            }
+        })
+    except Exception as e:
+        import traceback
+        return jsonify({
+            'code': 500,
+            'message': f'测试代码生成失败: {str(e)}',
+            'error_detail': traceback.format_exc()
+        }), 500
+
+@app.route('/api/test-cases/create', methods=['POST'])
+def create_test_case():
+    """创建新的测试用例文件"""
+    try:
+        data = request.get_json()
+        module = data.get('module', '')
+        case_name = data.get('case_name', '')
+        case_data = data.get('case_data', {})
+        
+        if not module or not case_name:
+            return jsonify({
+                'code': 400,
+                'message': '模块名和用例名不能为空'
+            }), 400
+        
+        # 构建文件路径
+        module_dir = project_root / 'data' / module
+        module_dir.mkdir(parents=True, exist_ok=True)
+        
+        file_path = module_dir / f'{case_name}.yaml'
+        
+        # 构建 YAML 内容
+        yaml_content = {
+            'case_common': {
+                'allureEpic': module,
+                'allureFeature': case_name,
+                'allureStory': case_name
+            }
+        }
+        yaml_content.update(case_data)
+        
+        # 保存文件
+        with open(file_path, 'w', encoding='utf-8') as f:
+            yaml.safe_dump(yaml_content, f, default_flow_style=False, allow_unicode=True, indent=2)
+        
+        return jsonify({
+            'code': 200,
+            'data': {
+                'file_path': str(file_path.relative_to(project_root)),
+                'module': module,
+                'case_name': case_name
+            },
+            'message': '测试用例创建成功'
         })
     except Exception as e:
         return jsonify({
             'code': 500,
-            'message': f'测试代码生成失败: {str(e)}'
+            'message': f'测试用例创建失败: {str(e)}'
         }), 500
 
 def run_tests_async():
     """异步执行测试"""
-    global test_execution_status
+    global test_execution_status, execution_history
     
     try:
         test_execution_status['running'] = True
         test_execution_status['logs'] = []
+        test_execution_status['results'] = None
         
         # 切换到项目根目录
         os.chdir(project_root)
+        
+        # 记录开始时间
+        start_time = datetime.now()
         
         # 执行测试命令
         process = subprocess.Popen(
@@ -265,27 +363,59 @@ def run_tests_async():
             bufsize=1
         )
         
+        test_execution_status['process'] = process
+        
         # 实时读取输出
         for line in process.stdout:
-            test_execution_status['logs'].append({
-                'timestamp': datetime.now().isoformat(),
-                'message': line.strip()
-            })
+            if test_execution_status['running']:  # 检查是否被停止
+                test_execution_status['logs'].append({
+                    'timestamp': datetime.now().isoformat(),
+                    'message': line.strip()
+                })
         
         process.wait()
+        end_time = datetime.now()
         
-        # 读取测试结果
+        # 构建执行结果
+        results = {
+            'status': 'completed' if process.returncode == 0 else 'failed',
+            'return_code': process.returncode,
+            'start_time': start_time.isoformat(),
+            'end_time': end_time.isoformat(),
+            'duration': (end_time - start_time).total_seconds(),
+            'stats': {
+                'total': 0,
+                'passed': 0,
+                'failed': 0,
+                'skipped': 0
+            }
+        }
+        
+        # 尝试解析测试结果统计
         try:
-            # 这里可以解析 allure 报告或日志文件获取结果
-            test_execution_status['results'] = {
-                'status': 'completed',
-                'return_code': process.returncode
-            }
+            # 这里可以从日志或报告文件中解析实际的统计信息
+            log_text = '\n'.join([log['message'] for log in test_execution_status['logs']])
+            # 简单的统计解析（可以根据实际日志格式优化）
+            if 'passed' in log_text.lower():
+                results['stats']['passed'] = log_text.lower().count('passed')
+            if 'failed' in log_text.lower():
+                results['stats']['failed'] = log_text.lower().count('failed')
+            if 'skipped' in log_text.lower():
+                results['stats']['skipped'] = log_text.lower().count('skipped')
+            results['stats']['total'] = results['stats']['passed'] + results['stats']['failed'] + results['stats']['skipped']
         except:
-            test_execution_status['results'] = {
-                'status': 'completed',
-                'return_code': process.returncode
-            }
+            pass
+        
+        test_execution_status['results'] = results
+        
+        # 添加到执行历史
+        execution_history.append({
+            'id': len(execution_history) + 1,
+            'timestamp': start_time.isoformat(),
+            'status': results['status'],
+            'duration': results['duration'],
+            'stats': results['stats']
+        })
         
     except Exception as e:
         test_execution_status['logs'].append({
@@ -298,6 +428,7 @@ def run_tests_async():
         }
     finally:
         test_execution_status['running'] = False
+        test_execution_status['process'] = None
 
 @app.route('/api/execute/start', methods=['POST'])
 def start_test_execution():
@@ -320,23 +451,67 @@ def start_test_execution():
         'message': '测试执行已开始'
     })
 
+@app.route('/api/execute/stop', methods=['POST'])
+def stop_test_execution():
+    """停止测试执行"""
+    global test_execution_status
+    
+    if not test_execution_status['running']:
+        return jsonify({
+            'code': 400,
+            'message': '当前没有正在执行的测试'
+        }), 400
+    
+    try:
+        # 终止进程
+        if test_execution_status['process']:
+            test_execution_status['process'].terminate()
+            test_execution_status['process'] = None
+        
+        test_execution_status['running'] = False
+        test_execution_status['logs'].append({
+            'timestamp': datetime.now().isoformat(),
+            'message': '测试执行已被用户停止'
+        })
+        
+        return jsonify({
+            'code': 200,
+            'message': '测试执行已停止'
+        })
+    except Exception as e:
+        return jsonify({
+            'code': 500,
+            'message': f'停止测试执行失败: {str(e)}'
+        }), 500
+
 @app.route('/api/execute/status', methods=['GET'])
 def get_execution_status():
     """获取测试执行状态"""
     return jsonify({
         'code': 200,
-        'data': test_execution_status
+        'data': {
+            'running': test_execution_status['running'],
+            'results': test_execution_status['results']
+        }
     })
 
 @app.route('/api/execute/logs', methods=['GET'])
 def get_execution_logs():
     """获取执行日志"""
-    limit = request.args.get('limit', 100, type=int)
+    limit = request.args.get('limit', 1000, type=int)
     logs = test_execution_status['logs'][-limit:] if test_execution_status['logs'] else []
     
     return jsonify({
         'code': 200,
         'data': logs
+    })
+
+@app.route('/api/execute/history', methods=['GET'])
+def get_execution_history():
+    """获取执行历史"""
+    return jsonify({
+        'code': 200,
+        'data': execution_history
     })
 
 if __name__ == '__main__':

@@ -43,7 +43,7 @@ const router = createRouter({
           component: () => import('@/views/TestCases/CreateWizard.vue'),
           meta: {
             title: '创建向导',
-            icon: 'Magic',
+            icon: 'MagicStick',
             hidden: true
           }
         },
@@ -81,6 +81,16 @@ const router = createRouter({
           meta: {
             title: '工具箱',
             icon: 'Tools'
+          }
+        },
+        {
+          path: '/debug',
+          name: 'Debug',
+          component: () => import('@/views/Debug.vue'),
+          meta: {
+            title: '联调测试',
+            icon: 'Tools',
+            hidden: true
           }
         }
       ]

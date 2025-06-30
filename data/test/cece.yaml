@@ -1,0 +1,19 @@
+case_common:
+  allureEpic: test
+  allureFeature: cece
+  allureStory: cece
+cece:
+  base_url: ${base_url}
+  name: cece
+  request:
+    data:
+      password: '123456'
+      user: coco
+    headers:
+      Content-Type: application/json
+    method: POST
+    url: /login
+  validate:
+  - jsonpath: $data.code
+    type: ==
+    value: '200'
