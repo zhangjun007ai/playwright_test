@@ -38,6 +38,16 @@ const router = createRouter({
           }
         },
         {
+          path: '/test-cases/wizard',
+          name: 'CreateWizard',
+          component: () => import('@/views/TestCases/CreateWizard.vue'),
+          meta: {
+            title: '创建向导',
+            icon: 'Magic',
+            hidden: true
+          }
+        },
+        {
           path: '/execution',
           name: 'Execution',
           component: () => import('@/views/Execution/index.vue'),

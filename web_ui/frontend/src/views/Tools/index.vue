@@ -8,25 +8,216 @@
         </h1>
         <p class="page-subtitle">实用工具与辅助功能</p>
       </div>
+      <div class="header-actions">
+        <el-button @click="refreshTools" :loading="refreshing">
+          <el-icon><Refresh /></el-icon>
+          刷新状态
+        </el-button>
+      </div>
     </div>
     
     <div class="tools-content">
-      <div class="tools-grid">
-        <!-- 代码生成器 -->
-        <div class="tool-card sketch-card">
-          <div class="tool-icon">
-            <el-icon size="48" color="#667eea"><MagicStick /></el-icon>
+      <!-- 工具分类标签 -->
+      <el-tabs v-model="activeTab" class="tools-tabs">
+        <el-tab-pane label="代码工具" name="code">
+          <div class="tools-grid">
+            <!-- 代码生成器 -->
+            <div class="tool-card sketch-card">
+              <div class="tool-header">
+                <div class="tool-icon">
+                  <el-icon size="32" color="#667eea"><MagicStick /></el-icon>
+                </div>
+                <div class="tool-status" :class="{ active: codeGenStatus }">
+                  <el-icon><CircleCheck v-if="codeGenStatus" /><Warning v-else /></el-icon>
+                </div>
+              </div>
+              <div class="tool-info">
+                <h3>代码生成器</h3>
+                <p>根据 YAML 用例自动生成 pytest 测试代码</p>
+                <div class="tool-stats">
+                  <span>已生成: {{ generatedCount }} 个文件</span>
+                </div>
+              </div>
+              <div class="tool-actions">
+                <el-button type="primary" @click="generateCode" :loading="generating">
+                  <el-icon><MagicStick /></el-icon>
+                  生成代码
+                </el-button>
+                <el-button @click="viewGeneratedFiles">
+                  查看文件
+                </el-button>
+              </div>
+            </div>
+
+            <!-- 代码验证器 -->
+            <div class="tool-card sketch-card">
+              <div class="tool-header">
+                <div class="tool-icon">
+                  <el-icon size="32" color="#00d4aa"><CircleCheck /></el-icon>
+                </div>
+                <div class="tool-status active">
+                  <el-icon><CircleCheck /></el-icon>
+                </div>
+              </div>
+              <div class="tool-info">
+                <h3>代码验证器</h3>
+                <p>验证 YAML 语法和用例完整性</p>
+                <div class="tool-stats">
+                  <span>验证通过: {{ validatedCount }} 个用例</span>
+                </div>
+              </div>
+              <div class="tool-actions">
+                <el-button @click="validateAllCases" :loading="validating">
+                  <el-icon><CircleCheck /></el-icon>
+                  验证全部
+                </el-button>
+              </div>
+            </div>
           </div>
-          <div class="tool-info">
-            <h3>代码生成器</h3>
-            <p>根据 YAML 用例自动生成 pytest 测试代码</p>
+        </el-tab-pane>
+
+        <el-tab-pane label="导入导出" name="import-export">
+          <div class="tools-grid">
+            <!-- 用例导入 -->
+            <div class="tool-card sketch-card">
+              <div class="tool-header">
+                <div class="tool-icon">
+                  <el-icon size="32" color="#4facfe"><Upload /></el-icon>
+                </div>
+                <div class="tool-status">
+                  <el-icon><Info /></el-icon>
+                </div>
+              </div>
+              <div class="tool-info">
+                <h3>用例导入</h3>
+                <p>从 Excel、Postman、Swagger 导入测试用例</p>
+                <div class="tool-stats">
+                  <span>支持格式: Excel, Postman, Swagger</span>
+                </div>
+              </div>
+              <div class="tool-actions">
+                <el-dropdown @command="handleImport">
+                  <el-button type="primary">
+                    <el-icon><Upload /></el-icon>
+                    导入用例
+                    <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item command="excel">Excel 文件</el-dropdown-item>
+                      <el-dropdown-item command="postman">Postman Collection</el-dropdown-item>
+                      <el-dropdown-item command="swagger">Swagger JSON</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </div>
+
+            <!-- 用例导出 -->
+            <div class="tool-card sketch-card">
+              <div class="tool-header">
+                <div class="tool-icon">
+                  <el-icon size="32" color="#ffb74d"><Download /></el-icon>
+                </div>
+                <div class="tool-status active">
+                  <el-icon><CircleCheck /></el-icon>
+                </div>
+              </div>
+              <div class="tool-info">
+                <h3>用例导出</h3>
+                <p>导出测试用例为 Excel、PDF 等格式</p>
+                <div class="tool-stats">
+                  <span>总用例: {{ totalCases }} 个</span>
+                </div>
+              </div>
+              <div class="tool-actions">
+                <el-dropdown @command="handleExport">
+                  <el-button>
+                    <el-icon><Download /></el-icon>
+                    导出用例
+                    <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                  </el-button>
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <el-dropdown-item command="excel">Excel 格式</el-dropdown-item>
+                      <el-dropdown-item command="pdf">PDF 文档</el-dropdown-item>
+                      <el-dropdown-item command="word">Word 文档</el-dropdown-item>
+                    </el-dropdown-menu>
+                  </template>
+                </el-dropdown>
+              </div>
+            </div>
           </div>
-          <div class="tool-actions">
-            <el-button type="primary" @click="generateCode" :loading="generating">
-              生成代码
-            </el-button>
+        </el-tab-pane>
+
+        <el-tab-pane label="环境管理" name="environment">
+          <div class="tools-grid">
+            <!-- 环境检查 -->
+            <div class="tool-card sketch-card">
+              <div class="tool-header">
+                <div class="tool-icon">
+                  <el-icon size="32" color="#f093fb"><Monitor /></el-icon>
+                </div>
+                <div class="tool-status" :class="{ active: envStatus.healthy }">
+                  <el-icon><CircleCheck v-if="envStatus.healthy" /><Warning v-else /></el-icon>
+                </div>
+              </div>
+              <div class="tool-info">
+                <h3>环境检查</h3>
+                <p>检查 Python、pytest、allure 等环境依赖</p>
+                <div class="tool-stats">
+                  <div class="env-item" v-for="item in envStatus.items" :key="item.name">
+                    <span>{{ item.name }}: </span>
+                    <el-tag :type="item.status === 'ok' ? 'success' : 'danger'" size="small">
+                      {{ item.version || item.status }}
+                    </el-tag>
+                  </div>
+                </div>
+              </div>
+              <div class="tool-actions">
+                <el-button @click="checkEnvironment" :loading="checking">
+                  <el-icon><Refresh /></el-icon>
+                  检查环境
+                </el-button>
+                <el-button @click="installMissing" v-if="!envStatus.healthy">
+                  修复环境
+                </el-button>
+              </div>
+            </div>
           </div>
-        </div>
+        </el-tab-pane>
+
+        <el-tab-pane label="数据管理" name="data">
+          <div class="tools-grid">
+            <!-- 数据清理 -->
+            <div class="tool-card sketch-card">
+              <div class="tool-header">
+                <div class="tool-icon">
+                  <el-icon size="32" color="#ff5722"><Delete /></el-icon>
+                </div>
+                <div class="tool-status">
+                  <el-icon><Info /></el-icon>
+                </div>
+              </div>
+              <div class="tool-info">
+                <h3>数据清理</h3>
+                <p>清理测试数据、日志文件和临时文件</p>
+                <div class="tool-stats">
+                  <span>日志大小: {{ logSize }}</span>
+                  <span>缓存大小: {{ cacheSize }}</span>
+                </div>
+              </div>
+              <div class="tool-actions">
+                <el-button @click="showCleanDialog = true" type="danger">
+                  <el-icon><Delete /></el-icon>
+                  清理数据
+                </el-button>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
+    </div>
         
         <!-- 数据清理 -->
         <div class="tool-card sketch-card">
@@ -133,9 +324,9 @@
       <el-form :model="importForm" label-width="100px">
         <el-form-item label="导入格式" prop="format" for="import-format">
           <el-radio-group id="import-format" v-model="importFormat">
-            <el-radio id="import-excel" label="excel">Excel 文件</el-radio>
-            <el-radio id="import-postman" label="postman">Postman Collection</el-radio>
-            <el-radio id="import-swagger" label="swagger">Swagger JSON</el-radio>
+            <el-radio id="import-excel" value="excel">Excel 文件</el-radio>
+            <el-radio id="import-postman" value="postman">Postman Collection</el-radio>
+            <el-radio id="import-swagger" value="swagger">Swagger JSON</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="选择文件" prop="file">
@@ -166,15 +357,15 @@
       <el-form :model="exportForm" label-width="100px">
         <el-form-item label="导出格式" prop="format" for="export-format">
           <el-radio-group id="export-format" v-model="exportFormat">
-            <el-radio id="export-excel" label="excel">Excel 文件</el-radio>
-            <el-radio id="export-pdf" label="pdf">PDF 文档</el-radio>
-            <el-radio id="export-word" label="word">Word 文档</el-radio>
+            <el-radio id="export-excel" value="excel">Excel 文件</el-radio>
+            <el-radio id="export-pdf" value="pdf">PDF 文档</el-radio>
+            <el-radio id="export-word" value="word">Word 文档</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="导出范围" prop="scope" for="export-scope">
           <el-radio-group id="export-scope" v-model="exportScope">
-            <el-radio id="export-all" label="all">全部用例</el-radio>
-            <el-radio id="export-module" label="module">按模块导出</el-radio>
+            <el-radio id="export-all" value="all">全部用例</el-radio>
+            <el-radio id="export-module" value="module">按模块导出</el-radio>
           </el-radio-group>
         </el-form-item>
       </el-form>

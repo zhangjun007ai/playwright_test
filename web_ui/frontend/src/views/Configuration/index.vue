@@ -139,10 +139,113 @@
                 <el-switch v-model="advancedForm.excel_report" />
                 <span class="form-tip">生成 Excel 格式的测试报告</span>
               </el-form-item>
+              <el-form-item label="并发执行" prop="concurrent_execution">
+                <el-switch v-model="advancedForm.concurrent_execution" />
+                <span class="form-tip">启用多线程并发执行测试</span>
+              </el-form-item>
+              <el-form-item label="失败重试次数" prop="retry_times">
+                <el-input-number v-model="advancedForm.retry_times" :min="0" :max="5" />
+                <span class="form-tip">测试失败时的重试次数</span>
+              </el-form-item>
               <el-form-item label="镜像源" prop="mirror_source" for="mirror-source">
                 <el-input id="mirror-source" v-model="advancedForm.mirror_source" placeholder="Python 包镜像源地址" />
               </el-form-item>
             </el-form>
+          </div>
+          
+          <div class="config-section sketch-card">
+            <h3>环境管理</h3>
+            <div class="env-management">
+              <div class="env-header">
+                <el-button type="primary" size="small" @click="showAddEnvDialog = true">
+                  <el-icon><Plus /></el-icon>
+                  添加环境
+                </el-button>
+                <el-select v-model="currentEnv" placeholder="选择当前环境" style="width: 200px;">
+                  <el-option
+                    v-for="env in environments"
+                    :key="env.name"
+                    :label="`${env.name} (${env.host})`"
+                    :value="env.name"
+                  />
+                </el-select>
+              </div>
+              
+              <div class="env-list">
+                <div v-for="env in environments" :key="env.name" class="env-item">
+                  <div class="env-info">
+                    <span class="env-name">{{ env.name }}</span>
+                    <span class="env-host">{{ env.host }}</span>
+                  </div>
+                  <div class="env-actions">
+                    <el-button type="text" size="small" @click="editEnvironment(env)">编辑</el-button>
+                    <el-button type="text" size="small" @click="deleteEnvironment(env.name)">删除</el-button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+        
+        <!-- 配置预览 -->
+        <el-tab-pane label="配置预览" name="preview">
+          <div class="config-section sketch-card">
+            <div class="config-preview-header">
+              <h3>当前配置预览</h3>
+              <div class="preview-actions">
+                <el-button type="default" @click="exportConfig">
+                  <el-icon><Download /></el-icon>
+                  导出配置
+                </el-button>
+                <el-button type="warning" @click="resetConfig">
+                  <el-icon><RefreshLeft /></el-icon>
+                  重置配置
+                </el-button>
+              </div>
+            </div>
+            
+            <div class="config-preview-content">
+              <el-card class="preview-card" header="基础配置">
+                <div class="preview-item">
+                  <span class="preview-label">项目名称:</span>
+                  <span class="preview-value">{{ configForm.project_name || '未设置' }}</span>
+                </div>
+                <div class="preview-item">
+                  <span class="preview-label">测试环境:</span>
+                  <span class="preview-value">{{ configForm.env || '未设置' }}</span>
+                </div>
+                <div class="preview-item">
+                  <span class="preview-label">测试负责人:</span>
+                  <span class="preview-value">{{ configForm.tester_name || '未设置' }}</span>
+                </div>
+                <div class="preview-item">
+                  <span class="preview-label">主域名:</span>
+                  <span class="preview-value">{{ configForm.host || '未设置' }}</span>
+                </div>
+              </el-card>
+              
+              <el-card class="preview-card" header="通知配置">
+                <div class="preview-item">
+                  <span class="preview-label">启用的通知:</span>
+                  <span class="preview-value">
+                    {{ getNotificationTypeText() || '未设置' }}
+                  </span>
+                </div>
+              </el-card>
+              
+              <el-card class="preview-card" header="数据库配置">
+                <div class="preview-item">
+                  <span class="preview-label">数据库状态:</span>
+                  <el-tag :type="databaseForm.switch ? 'success' : 'info'">
+                    {{ databaseForm.switch ? '已启用' : '未启用' }}
+                  </el-tag>
+                </div>
+                <div v-if="databaseForm.switch" class="preview-item">
+                  <span class="preview-label">连接地址:</span>
+                  <span class="preview-value">{{ databaseForm.host }}:{{ databaseForm.port }}</span>
+                </div>
+              </el-card>
+            </div>
           </div>
         </el-tab-pane>
       </el-tabs>
@@ -153,8 +256,8 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useConfigStore } from '@/stores/config'
-import { ElMessage } from 'element-plus'
-import { Setting, DocumentChecked, Connection } from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { Setting, DocumentChecked, Connection, Plus, Download, RefreshLeft } from '@element-plus/icons-vue'
 
 const configStore = useConfigStore()
 
@@ -199,8 +302,19 @@ const databaseForm = ref({
 const advancedForm = ref({
   real_time_update: false,
   excel_report: false,
-  mirror_source: ''
+  concurrent_execution: true,
+  retry_times: 1,
+  mirror_source: 'https://pypi.tuna.tsinghua.edu.cn/simple'
 })
+
+// 环境管理
+const showAddEnvDialog = ref(false)
+const currentEnv = ref('test')
+const environments = ref([
+  { name: 'test', host: 'https://test-api.example.com', description: '测试环境' },
+  { name: 'prod', host: 'https://api.example.com', description: '生产环境' }
+])
+const editingEnv = ref(null)
 
 // 保持向后兼容的计算属性
 const selectedNotifications = computed({
@@ -264,6 +378,91 @@ const testConnection = async () => {
   } finally {
     testing.value = false
   }
+}
+
+// 环境管理方法
+const editEnvironment = (env) => {
+  editingEnv.value = { ...env }
+  showAddEnvDialog.value = true
+}
+
+const deleteEnvironment = (envName) => {
+  ElMessageBox.confirm('确定要删除这个环境配置吗？', '删除确认', {
+    type: 'warning'
+  }).then(() => {
+    environments.value = environments.value.filter(env => env.name !== envName)
+    ElMessage.success('环境删除成功')
+  })
+}
+
+// 配置预览方法
+const getNotificationTypeText = () => {
+  const types = {
+    '1': '钉钉',
+    '2': '企业微信', 
+    '3': '邮箱',
+    '4': '飞书'
+  }
+  return selectedNotifications.value.map(type => types[type]).join('、')
+}
+
+const exportConfig = () => {
+  const config = {
+    basic: configForm.value,
+    notification: notificationForm.value,
+    database: databaseForm.value,
+    advanced: advancedForm.value,
+    environments: environments.value
+  }
+  
+  const dataStr = JSON.stringify(config, null, 2)
+  const dataBlob = new Blob([dataStr], { type: 'application/json' })
+  const url = URL.createObjectURL(dataBlob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = 'pytest-auto-api-config.json'
+  link.click()
+  URL.revokeObjectURL(url)
+  ElMessage.success('配置导出成功')
+}
+
+const resetConfig = () => {
+  ElMessageBox.confirm('确定要重置所有配置吗？此操作不可撤销。', '重置确认', {
+    type: 'warning'
+  }).then(() => {
+    // 重置所有表单
+    configForm.value = {
+      project_name: '',
+      env: '',
+      tester_name: '',
+      host: ''
+    }
+    
+    notificationForm.value = {
+      selectedTypes: [],
+      ding_talk: { webhook: '', secret: '' },
+      wechat: { webhook: '' },
+      email: { send_user: '', email_host: '', stamp_key: '', send_list: '' }
+    }
+    
+    databaseForm.value = {
+      switch: false,
+      host: '',
+      port: 3306,
+      user: '',
+      password: ''
+    }
+    
+    advancedForm.value = {
+      real_time_update: false,
+      excel_report: false,
+      concurrent_execution: true,
+      retry_times: 1,
+      mirror_source: 'https://pypi.tuna.tsinghua.edu.cn/simple'
+    }
+    
+    ElMessage.success('配置重置成功')
+  })
 }
 
 // 生命周期
@@ -357,6 +556,92 @@ onMounted(() => {
     padding: $spacing-md;
     border-radius: $sketch-radius;
     margin: $spacing-md 0;
+  }
+}
+
+.env-management {
+  .env-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-lg;
+  }
+  
+  .env-list {
+    .env-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: $spacing-md;
+      border: 1px solid $border-light;
+      border-radius: $sketch-radius;
+      margin-bottom: $spacing-sm;
+      background: $bg-secondary;
+      
+      .env-info {
+        .env-name {
+          font-weight: 600;
+          color: $text-primary;
+          margin-right: $spacing-md;
+        }
+        
+        .env-host {
+          color: $text-secondary;
+          font-size: $font-size-sm;
+        }
+      }
+      
+      .env-actions {
+        display: flex;
+        gap: $spacing-xs;
+      }
+    }
+  }
+}
+
+.config-preview-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-lg;
+  
+  h3 {
+    margin: 0;
+  }
+  
+  .preview-actions {
+    display: flex;
+    gap: $spacing-sm;
+  }
+}
+
+.config-preview-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: $spacing-lg;
+  
+  .preview-card {
+    .preview-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: $spacing-xs 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      
+      &:last-child {
+        border-bottom: none;
+      }
+      
+      .preview-label {
+        font-weight: 500;
+        color: $text-secondary;
+      }
+      
+      .preview-value {
+        color: $text-primary;
+        font-weight: 600;
+      }
+    }
   }
 }
 </style>

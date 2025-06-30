@@ -55,12 +55,15 @@ def check_dependencies():
         print("请运行: pip install flask flask-cors")
         return False
     
-    # 检查 Node.js 和 npm
+    # 检查 npm (Node.js 通过 npm 间接验证)
     try:
-        subprocess.run(['node', '--version'], check=True, capture_output=True)
-        subprocess.run(['npm', '--version'], check=True, capture_output=True)
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("❌ 未找到 Node.js 或 npm，请先安装 Node.js")
+        result = subprocess.run(['npm', '--version'], capture_output=True, text=True)
+        if result.returncode != 0:
+            print("❌ npm 命令执行失败，请检查 Node.js 安装")
+            return False
+        print(f"✅ npm 版本: {result.stdout.strip()}")
+    except FileNotFoundError:
+        print("❌ 未找到 npm，请先安装 Node.js")
         return False
     
     print("✅ 依赖检查通过")

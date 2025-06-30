@@ -93,30 +93,110 @@ export const apiService = {
     return api.get('/test-cases')
   },
   
-  getTestCaseContent(filePath) {
-    return api.get(`/test-cases/${filePath}`)
+  getTestCaseFile(filePath) {
+    return api.get(`/test-cases/${encodeURIComponent(filePath)}`)
   },
   
-  saveTestCaseContent(filePath, content) {
-    return api.post(`/test-cases/${filePath}`, { content })
+  saveTestCaseFile(filePath, content) {
+    return api.post(`/test-cases/${encodeURIComponent(filePath)}`, { content })
+  },
+  
+  deleteTestCaseFile(filePath) {
+    return api.delete(`/test-cases/${encodeURIComponent(filePath)}`)
+  },
+  
+  createTestCaseFile(moduleData) {
+    return api.post('/test-cases/create', moduleData)
   },
   
   // 代码生成
-  generateCode() {
-    return api.post('/generate-code')
+  generateCode(filePath = null) {
+    const data = filePath ? { file_path: filePath } : {}
+    return api.post('/generate-code', data)
+  },
+  
+  getGenerationStatus() {
+    return api.get('/generate-code/status')
   },
   
   // 测试执行
-  startExecution() {
-    return api.post('/execute/start')
+  startExecution(options = {}) {
+    return api.post('/execute/start', options)
+  },
+  
+  stopExecution() {
+    return api.post('/execute/stop')
   },
   
   getExecutionStatus() {
     return api.get('/execute/status')
   },
   
-  getExecutionLogs(limit = 100) {
+  getExecutionLogs(limit = 1000) {
     return api.get('/execute/logs', { params: { limit } })
+  },
+  
+  getExecutionHistory() {
+    return api.get('/execute/history')
+  },
+  
+  // 报告管理
+  getReports() {
+    return api.get('/reports')
+  },
+  
+  getReportDetail(reportId) {
+    return api.get(`/reports/${reportId}`)
+  },
+  
+  downloadReport(reportId) {
+    return api.get(`/reports/${reportId}/download`, { responseType: 'blob' })
+  },
+  
+  // 工具箱功能
+  importFromExcel(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post('/tools/import/excel', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+  
+  importFromPostman(file) {
+    const formData = new FormData()
+    formData.append('file', file)
+    return api.post('/tools/import/postman', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
+  },
+  
+  importFromSwagger(data) {
+    return api.post('/tools/import/swagger', data)
+  },
+  
+  exportToExcel(options) {
+    return api.post('/tools/export/excel', options, { responseType: 'blob' })
+  },
+  
+  exportToPdf(options) {
+    return api.post('/tools/export/pdf', options, { responseType: 'blob' })
+  },
+  
+  // 模板管理
+  getTemplates() {
+    return api.get('/templates')
+  },
+  
+  createTemplate(template) {
+    return api.post('/templates', template)
+  },
+  
+  updateTemplate(id, template) {
+    return api.put(`/templates/${id}`, template)
+  },
+  
+  deleteTemplate(id) {
+    return api.delete(`/templates/${id}`)
   }
 }
 

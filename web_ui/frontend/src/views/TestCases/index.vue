@@ -9,6 +9,10 @@
         <p class="page-subtitle">管理和编辑测试用例</p>
       </div>
       <div class="header-actions">
+        <el-button type="success" @click="openWizard">
+          <el-icon><Magic /></el-icon>
+          创建向导
+        </el-button>
         <el-button type="primary" @click="showCreateDialog = true">
           <el-icon><Plus /></el-icon>
           新建用例
@@ -202,6 +206,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import {
   Document,
   Plus,
+  Magic,
   MagicStick,
   Refresh,
   Search,
@@ -289,6 +294,10 @@ const filteredCases = computed(() => {
 })
 
 // 方法
+const openWizard = () => {
+  router.push('/test-cases/wizard')
+}
+
 const loadTestCases = async () => {
   try {
     loading.value = true
